@@ -1,0 +1,74 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('catalog.static', filename='css/styles.css') }}">
+
+{% if favorite_items %}
+    <div class="order-summary-dns">
+      <div class="order-count">Товаров: {{ favorite_items | length }},
+          на сумму <span class="order-total">{{  '{:,.0f}'.format(favorite_items |
+          sum(attribute='products.price')).replace(',', ' ') }} ₽</span>
+      </div>
+    </div>
+    <div class="cart-list-dns">
+    {% for item in favorite_items %}
+      <div class="cart-card-dns">
+        <div class="cart-imgbox-dns">
+          <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
+              <img src="{{ url_for('catalog.static', filename='images/' + item.products.picture) }}"
+                   alt="{{ item.products.name }}" class="cart-img-dns"></a>
+    {#      {% if item.products.discount %}#}
+    {#        <span class="cart-label-dns discount">-{{ item.products.discount }}%</span>#}
+    {#      {% endif %}#}
+        </div>
+        <div class="cart-info-dns">
+            <div class="cart-name-dns"><a href="{{ url_for('catalog.product',
+            product_slug=item.products.slug) }}">{{ item.products.name }}</a>
+            </div>
+
+            <div class="cart-props-dns">
+              {{ item.products.description.replace('\n', '<br>') | safe }}
+            </div>
+
+            <div class="cart-meta-dns">
+    {#          <span class="cart-meta-rate">★ {{ item.products.rating }} | {{ item.products.reviews }} отзывов</span>#}
+              <span class="cart-meta-status">В наличии</span>
+            </div>
+        </div>
+        <div class="cart-side-dns">
+          <div class="cart-price-row-dns">
+            <span class="cart-price-dns">{{ '{:,.0f}'.format(item.products.price).replace(',', ' ') }} ₽</span>
+              {% set is_favorite = item.product_id in favorite_ids %}
+                    <button class="fav-btn favorite-toggle-btn {% if is_favorite %} is-fav {% endif %}"
+                        data-product-id="{{ item.products.id }}">
+                        &#10084;
+                    </button>
+                    </button>
+
+    {#        {% if item.products.old_price %}#}
+    {#        <span class="cart-oldprice-dns">{{ '{:,.0f}'.format(item.products.old_price).replace(',', ' ') }}</span>#}
+    {#        {% endif %}#}
+{#          </div>#}
+              <div class="cart-fav-buy-dns">
+                <form method="post" action="{{ url_for('catalog.add_to_cart', product_id=item.products.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                  <button class="cart-buy-btn-dns">Купить</button>
+                </form>
+              </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <div class="order-summary-dns">
+        <div class="order-count">В избранном пока нет товаров</div>
+    </div>
+{% endif %}
+
+<div class="cart-bottom-actions">
+    <a href="{{ url_for('catalog.catalog_index') }}" class="cart-bottom-btn">Перейти в каталог</a>
+    <a href="{{ url_for('catalog.cart') }}" class="cart-bottom-btn cart-btn-accent">Перейти в корзину</a>
+</div>
+
+{% endblock %}

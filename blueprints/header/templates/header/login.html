@@ -1,0 +1,51 @@
+{% extends 'header/base.html' %}
+
+{% block content %}
+{{ super() }}
+<form action="" method="post" class="form-contact">
+{{ form.hidden_tag() }}
+    <p>
+        {{ form.login_type.label }}
+        {% for value, label in form.login_type.choices %}
+            <label>
+                <input type="radio" name="{{ form.login_type.name }}"
+                        value="{{ value }}"
+                       {% if login_type == value %}checked{% endif %}
+                       onchange="toggleLoginType()"> {{ label }}
+            </label>
+        {% endfor %}
+    </p>
+    <div id="email-block"{% if login_type != 'email' %} style="display:none;"{% endif %}>
+        {{ form.email.label() }} {{ form.email(class=form.email.errors and 'invalid' or '') }}
+            {% if form.email.errors %}
+                <span class="invalid-feedback">
+                    {% for e in form.email.errors %}{{ e }}{% endfor %}
+                </span>
+            {% endif %}
+    </div>
+    <div id="phone-block"{% if login_type != 'phone' %} style="display:none;"{% endif %}>
+        {{ form.phone.label() }} {{ form.phone(class=form.phone.errors and 'invalid' or '') }}
+            {% if form.phone.errors %}
+                <span class="invalid-feedback">
+                    {% for e in form.phone.errors %}{{ e }}{% endfor %}
+                </span>
+            {% endif %}
+    </div>
+
+    <p>{{ form.psw.label() }} {{ form.psw() }}
+    <p>{{ form.remember.label() }} {{ form.remember() }}
+    <p>{{ form.submit() }}
+    <p><a href="{{ url_for('header.register') }}" class="btn btn-secondary">Регистрация</a>
+</form>
+
+{#Скрипт для переключения способа входа (email/телефон)#}
+<script>
+function toggleLoginType() {
+    var loginType = document.querySelector('input[name="login_type"]:checked').value;
+    document.getElementById('email-block').style.display = (loginType === 'email') ? 'block' : 'none';
+    document.getElementById('phone-block').style.display = (loginType === 'phone') ? 'block' : 'none';
+}
+window.onload = toggleLoginType;
+</script>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'header/base.html' %}
+
+{% block content %}
+{{ super() }}
+<link type="text/css" href="{{ url_for('admin.static', filename='css/styles.css') }}" rel="stylesheet" />
+
+<header class="admin-header">
+<div class="logo">Админ-панель</div>
+<nav class="top-nav">
+  <a href="{{ url_for('admin.logout') }}" class="logout-btn">Выйти из админ-панели</a>
+</nav>
+</header>
+
+<div class="admin-container">
+<aside class="sidebar">
+  <ul>
+    <li><a href="{{ url_for('admin.dashboard') }}"
+           class="{% if active_tab == 'dashboard' %}
+           active
+            {% endif %}">
+        Панель управления</a></li>
+
+      <li><a href="{{ url_for('admin.users') }}"
+           class="{% if active_tab == 'users' %}
+           active
+            {% endif %}">
+        Пользователи</a></li>
+
+      <li><a href="{{ url_for('admin.products') }}"
+           class="{% if active_tab == 'products' %}
+           active
+            {% endif %}">
+        Товары</a></li>
+
+      <li><a href="{{ url_for('admin.orders') }}"
+           class="{% if active_tab == 'orders' %}
+           active
+            {% endif %}">
+        Заказы</a></li>
+  </ul>
+</aside>
+
+{% block info %}
+{% endblock info %}
+
+</div>
+{% endblock %}

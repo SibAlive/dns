@@ -1,0 +1,166 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link type="text/css" href="{{ url_for('catalog.static', filename='css/styles.css') }}" rel="stylesheet" />
+
+<div class="catalog-container">
+    {#    breadcrumbds#}
+    <nav arial-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for item in breadcrumbs %}
+                <li class="breadcrumb-item">
+                    {% if item.endpoint %}
+                        <a href="{{ url_for(item.endpoint, **item.params) }}">{{ item.name }}</a>
+                    {% else %}
+                        {{ item.name }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+
+    <h1 class="catalog-title">{{ title }}</h1>
+
+    <div class="sort-controls">
+        Сортировать по:
+        <button class="sort-btn" data-sort-by="price">Цене</button>
+        <button class="sort-btn" data-sort-by="name">Имени</button>
+    </div>
+
+    <div class="products-grid">
+      {% for product in products %}
+        <div class="products-card">
+            <a href="{{ url_for(
+                    'catalog.product',
+                    product_slug=product.slug) }}" class="no-underline">
+              <div class="products-header">
+                <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="products-img">
+              </div>
+              <div class="products-title">
+                {{ product.name }}
+              </div>
+            </a>
+              <div class="products-purchase-row">
+                <span class="products-price">{{ '{:,.0f}'.format(product.price).replace(',', ' ') }} ₽</span>
+                  {% set is_favorite = product.id in favorite_ids %}
+                        <button class="fav-btn favorite-toggle-btn {% if is_favorite %} is-fav {% endif %}"
+                                data-product-id="{{ product.id }}">
+                            &#10084;
+                        </button>
+{#                <button class="products-cart"></button>#}
+                  <form method="post" action="{{ url_for('catalog.add_to_cart', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                    <button type="submit" class="products-cart"></button>
+                  </form>
+
+
+              </div>
+          <div class="products-stores">
+              {% if product.stock_quantity %}
+                В наличии
+              {% else %}
+                Нет в наличии
+              {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+</div>
+
+<script>
+    // --- Переменные для сортировки ---
+    window.sortUrl = "{{ url_for('catalog.product_sort', subcategory_slug=subcategory_slug) }}";
+    window.initialFavoriteIds = {{ favorite_ids | tojson }};
+    window.imagePathTemplate = "{{ url_for('catalog.static', filename='images/').rstrip('/') }}/";
+    window.sortState = {
+        price: 'asc', // 'asc' или 'desc'
+        name: 'asc'
+    };
+    window.csrfToken = "{{ csrf_token() }}"; // добавляем CSRF-токен
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Обработчик сортировки
+        document.querySelectorAll('.sort-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const sortBy = this.dataset.sortBy;
+
+                if (window.sortState[sortBy] === 'asc') {
+                    window.sortState[sortBy] = 'desc';
+                } else {
+                    window.sortState[sortBy] = 'asc';
+                }
+
+                document.querySelectorAll('.sort-btn').forEach(btn => {
+                    btn.classList.remove('sort-asc', 'sort-desc');
+                });
+                this.classList.add(`sort-${window.sortState[sortBy]}`);
+
+                const sortUrlWithParams = `${window.sortUrl}?sort_by=${sortBy}&order=${window.sortState[sortBy]}`;
+
+                console.log("Запрашиваем URL:", sortUrlWithParams);
+
+                fetch(sortUrlWithParams, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': window.csrfToken
+                    }
+                })
+                    .then(response => {
+                        console.log("Ответ на сортировку получен:", response);
+                        if (!response.ok) {
+                            console.error('HTTP Error при сортировке:', response.status, response.statusText);
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Данные сортировки получены:", data);
+
+                        // НАХОДИМ КОНТЕЙНЕР С ТОВАРАМИ
+                        const grid = document.querySelector('.products-grid');
+                        if (!grid) {
+                            console.error('Элемент .products-grid не найден');
+                            return;
+                        }
+
+                        // ОЧИЩАЕМ КОНТЕЙНЕР
+                        grid.innerHTML = '';
+
+                        // ДОБАВЛЯЕМ НОВЫЕ ТОВАРЫ
+                        data.products.forEach(product => {
+                            const productUrl = `/category/${product.category_id}/subcategory/${product.subcategory_id}/product/${product.id}`;
+                            const imageUrl = window.imagePathTemplate + product.picture;
+                            const isFavClass = window.initialFavoriteIds.includes(product.id) ? "is-fav" : "";
+
+                            const card = `
+                                <div class="products-card">
+                                    <a href="${productUrl}" class="no-underline">
+                                        <div class="products-header">
+                                            <img src="${imageUrl}" alt="${product.name}" class="products-img">
+                                        </div>
+                                        <div class="products-title">${product.name}</div>
+                                    </a>
+                                    <div class="products-purchase-row">
+                                        <span class="products-price">${product.price.toLocaleString('ru-RU').replace(/\s/g, ' ')} ₽</span>
+                                        <button class="fav-btn favorite-toggle-btn ${isFavClass}" data-product-id="${product.id}">&#10084;</button>
+                                        <button class="products-cart"></button>
+                                    </div>
+                                    <div class="products-stores">${product.stock_quantity > 0 ? 'В наличии' : 'Нет в наличии'}</div>
+                                </div>
+                            `;
+                            grid.insertAdjacentHTML('beforeend', card);
+                        });
+
+                        // Логируем, что контейнер очищен и заполнен
+                        console.log('Контейнер .products-grid обновлён.');
+                    })
+                    .catch(error => console.error('Ошибка загрузки при сортировке:', error));
+            });
+        });
+    });
+</script>
+
+{% endblock %}

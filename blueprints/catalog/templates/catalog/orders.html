@@ -1,0 +1,90 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('catalog.static', filename='css/styles.css') }}">
+
+<div class="order-list">
+    {% for order in orders %}
+      <div class="order-summary" onclick="toggleDetails(this)">
+        <div class="order-summary-top">
+            <span class="order-number"><b>Заказ {{ order.id }}</b> от <time datetime=
+                "{{ order.updated_at.strftime('%d.%m.%Y') }}">
+                {{ order.updated_at.strftime('%d.%m.%Y') }}</time></span>
+            <span class="order-status">{{ order.status }}</span>
+            <span class="order-delivery-method">{{ order.shipping_method }}</span>
+
+            <span class="order-expand-arrow">&#9662;</span>
+        </div>
+
+        <div class="order-preview">
+            {% for product in order.order_item %}
+                <img src="{{ url_for('catalog.static', filename='images/' + product.products.picture) }}"
+                     alt="{{ product.name }}" class="order-preview-item">
+            {% endfor %}
+
+            <div class="order-price-action">
+                <span class="order-total">{{ '{:,.0f}'.format(order.total_amount).replace(',', ' ') }} ₽</span>
+
+                {% if order.status == "Забронирован" %}
+                    <div class="order-actions-row">
+                        <form method="post" action="{{ url_for('catalog.cancel_order', order_id=order.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                            <button type="submit" class="btn-cancel" onclick="return confirm('Отменить заказ?')">Отменить</button>
+                        </form>
+
+                        <form method="post" action="{{ url_for('catalog.buy_order', order_id=order.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                            <button type="submit" class="btn-pay" onclick="return confirm('Оплатить заказ?')">Оплатить</button>
+                        </form>
+                    </div>
+
+                {% else %}
+                    <form method="post" action="{{ url_for('catalog.repeat_order', order_id=order.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                        <button type="submit" class="btn-repeat">Повторить</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+      </div>
+
+      <div class="order-details">
+        <!-- Развёрнутый список товаров -->
+        {% for product in order.order_item %}
+            <div class="order-item">
+              <img src="{{ url_for('catalog.static', filename='images/' + product.products.picture) }}"
+                     alt="{{ product.name }}" class="order-preview-item">
+              <div class="order-item-data">
+                <div class="order-item-title">{{ product.name }}</div>
+                {% if product.sku %}
+                    <div class="order-item-code">{{ product.sku }}</div>
+                {% endif %}
+              </div>
+
+              <div class="order-item-price">
+                <span>Цена: <b>{{ '{:,.0f}'.format(product.price * product.quantity).replace(',', ' ') }} ₽</b></span>
+                <div>{{ product.quantity }}&nbsp;шт. x {{ '{:,.0f}'.format(product.price).replace(',', ' ') }}&nbsp;₽</div>
+              </div>
+            </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+</div>
+
+{#Скрипт развертывания заказа#}
+<script>
+function toggleDetails(summaryDiv) {
+  const details = summaryDiv.nextElementSibling;
+  const arrow = summaryDiv.querySelector('.order-expand-arrow');
+  const opened = details.style.display === "block";
+  document.querySelectorAll('.order-details').forEach(det => det.style.display = 'none');
+  document.querySelectorAll('.order-expand-arrow').forEach(ar => ar.style.transform = 'rotate(0deg)');
+  if (!opened) {
+    details.style.display = "block";
+    arrow.style.transform = "rotate(180deg)";
+  }
+}
+</script>
+
+
+{% endblock %}

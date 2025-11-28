@@ -1,0 +1,81 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link type="text/css" href="{{ url_for('catalog.static', filename='css/styles.css') }}" rel="stylesheet" />
+
+<body>
+<div class="product-layout">
+  {#    breadcrumbds#}
+    <nav arial-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for item in breadcrumbs %}
+                <li class="breadcrumb-item">
+                    {% if item.endpoint %}
+                        <a href="{{ url_for(item.endpoint, **item.params) }}">{{ item.name }}</a>
+                    {% else %}
+                        {{ item.name }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </nav>
+
+  <h1 class="product-h1">{{ product.name }}</h1>
+
+  <div class="product-wrapper">
+    <!-- Галерея слева -->
+    <aside class="product-gallery">
+{#      <div class="gallery-thumbs">#}
+{#        <img src="thumb1.jpg" class="gallery-thumb active">#}
+{#        <img src="thumb2.jpg" class="gallery-thumb">#}
+{#        <img src="thumb3.jpg" class="gallery-thumb">#}
+{#        <img src="thumb4.jpg" class="gallery-thumb">#}
+{#        <img src="thumb5.jpg" class="gallery-thumb">#}
+{#      </div>#}
+      <div class="gallery-main">
+        <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="gallery-main-img">
+      </div>
+    </aside>
+
+    <!-- Информация и правая колонка -->
+    <section class="product-info-section">
+
+      <div class="product-top-block">
+        <div class="product-props">
+          <div>{{ product.description.replace('\n', '<br>') | safe }}</div>
+        </div>
+      </div>
+
+      <div class="product-price-row">
+        <span class="price-current">{{ '{:,.0f}'.format(product.price).replace(',', ' ') }} ₽</span>
+        <span class="price-old">137 499</span>
+      </div>
+
+      <div class="product-buy-row">
+        <form method="post" action="{{ url_for('catalog.add_to_cart', product_id=product.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+          <button type="submit" class="buy-btn">Купить</button>
+        </form>
+
+        {% set is_favorite = product.id in favorite_ids %}
+            <button class="fav-btn favorite-toggle-btn {% if is_favorite %} is-fav {% endif %}"
+                data-product-id="{{ product.id }}">
+                &#10084;
+            </button>
+      </div>
+
+      <div class="product-extra-blocks">
+        <span class="in-stock">
+          {% if product.stock_quantity %}
+            В наличии
+          {% else %}
+            Нет в наличии
+          {% endif %}
+        </span>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+
+{% endblock %}

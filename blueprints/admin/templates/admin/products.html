@@ -1,0 +1,143 @@
+{% extends 'admin/index.html' %}
+
+{% block info %}
+{{ super() }}
+
+<main class="content">
+    <h1>Товары</h1>
+    <div class="products-actions">
+      <a href="{{ url_for('admin.create_category') }}" class="add-category-btn">Добавить категорию</a>
+    </div>
+    <div class="categories-list">
+      {% for item in categories_data %}
+        <div class="category-block">
+          <div class="category-row">
+            <!-- Кнопка сворачивания категории -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button class="toggle-btn" onclick="toggleCategory(this)">▶</button>
+              <strong>Категория: {{ item.category.name }}</strong>
+            </div>
+
+            <div>
+              <a href="{{ url_for('admin.edit_category', cat_slug=item.category.slug) }}" class="entity-action-btn">Редактировать категорию</a>
+              <form method="POST" action="{{ url_for('admin.delete_category', cat_id=item.category.id) }}" style="display:inline">
+                  <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                  <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить категорию?')">Удалить категорию</button>
+              </form>
+              <a href="{{ url_for('admin.create_category', cat_id=item.category.id) }}" class="entity-action-btn add">Добавить подкатегорию</a>
+            </div>
+          </div>
+
+          <!-- Содержимое категории (по умолчанию свёрнуто) -->
+          <div class="category-content collapsed">
+            {% if item.subcategories %}
+              <!-- Цикл по подкатегориям -->
+            {% for subcat_data in item.subcategories %}
+            <div class="subcategory-block">
+              <div class="subcategory-row">
+                <!-- Кнопка сворачивания подкатегории -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button class="toggle-btn" onclick="toggleSubcategory(this)">▶</button>
+                  <span>Подкатегория: {{ subcat_data.subcategory.name }}</span>
+                </div>
+                <div>
+                  <a href="{{ url_for('admin.edit_category', cat_slug=subcat_data.subcategory.slug, is_subcategory=True) }}" class="entity-action-btn">Редактировать подкатегорию</a>
+                    <form method="POST" action="{{ url_for('admin.delete_category',
+                    cat_id=subcat_data.subcategory.id, is_subcategory=True) }}" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                        <button type="submit" class="entity-action-btn delete"
+                                onclick="return confirm('Удалить подкатегорию?')">Удалить подкатегорию
+                        </button>
+                    </form>
+                  <a href="{{ url_for('admin.create_product', cat_id=item.category.id, subcat_id=subcat_data.subcategory.id) }}" class="entity-action-btn add">Добавить товар</a>
+                </div>
+              </div>
+
+              <!-- Таблица товаров подкатегории (по умолчанию свёрнута) -->
+              <div class="subcategory-content collapsed">
+                {% if subcat_data.products %}
+                  <!-- Цикл по товарам -->
+                {% for product in subcat_data.products %}
+                <table class="products-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Название</th>
+                      <th>Цена, руб</th>
+                      <th>Остаток на складе</th>
+                      <th>Артикул</th>
+                      <th>Вес, кг</th>
+                      <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ product.id }}</td>
+                      <td>{{ product.name }}</td>
+                      <td>{{ product.price }}</td>
+                      <td>{{ product.stock_quantity }}</td>
+                      <td>{{ product.sku if product.sku else "Отсутствует"}}</td>
+                      <td>{{ product.weight if product.weight else "Неизвестно"}}</td>
+                      <td>
+                        <a href="{{ url_for("admin.edit_product", product_slug=product.slug) }}" class="entity-action-btn">Изменить</a>
+                        <form method="POST" action="{{ url_for("admin.delete_product", product_id=product.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                            <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить подкатегорию?')">Удалить</button>
+                        </form>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              {% endfor %}
+              {% else %}
+              <div style="padding: 20px; text-align: center; color: #999;">
+                    Товары отсутствуют
+              </div>
+              {% endif %}
+{#              Если товаров нет#}
+              </div>
+            </div>
+                {% endfor %}
+          {% else %}
+{#          Если подкатегорий нет #}
+              <div style="padding: 20px; text-align: center; color: #999;">
+                    Товары отсутствуют
+              </div>
+            {% endif %}
+          </div>
+          <!-- Конец category-content -->
+        </div>
+      {% endfor %}
+    </div>
+</main>
+
+<script>
+// Функция для сворачивания/разворачивания категорий
+function toggleCategory(button) {
+  const categoryBlock = button.closest('.category-block');
+  const content = categoryBlock.querySelector('.category-content');
+
+  content.classList.toggle('collapsed');
+
+  if (content.classList.contains('collapsed')) {
+    button.textContent = '▶';
+  } else {
+    button.textContent = '▼';
+  }
+}
+
+// Функция для сворачивания/разворачивания подкатегорий
+function toggleSubcategory(button) {
+  const subcategoryBlock = button.closest('.subcategory-block');
+  const content = subcategoryBlock.querySelector('.subcategory-content');
+
+  content.classList.toggle('collapsed');
+
+  if (content.classList.contains('collapsed')) {
+    button.textContent = '▶';
+  } else {
+    button.textContent = '▼';
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,607 @@
+      /* --- Стили для index.html --- */
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* Header */
+.admin-header {
+  background: #0073e6;
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.admin-header .logo {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #FFFFFF;         /* Ярко-белый */
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(0,50,100,0.23);
+}
+/* Кнопка выхода */
+.admin-header .top-nav a {
+  color: #FFFFFF;         /* Ярко-белый */
+  background: #0364b8;    /* Синяя яркая плашка */
+  padding: 11px 26px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.07rem;
+  box-shadow: 0 1.5px 6px rgba(0,50,150,0.10);
+  transition: background 0.22s, color 0.22s;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  border: 2px solid #ffffff0d;
+}
+.admin-header .top-nav a:hover,
+.admin-header .top-nav a.logout-btn {
+  color: white;
+}
+
+/* Layout */
+.admin-container {
+  display: flex;
+  min-height: calc(100vh - 52px);
+}
+
+/* Sidebar */
+.sidebar {
+  background: white;
+  border-right: 1px solid #ddd;
+  width: 220px;
+  padding-top: 20px;
+  box-shadow: inset -1px 0 5px rgba(0,0,0,0.05);
+}
+.sidebar ul {
+  list-style: none;
+}
+.sidebar ul li a {
+  display: block;
+  padding: 14px 24px;
+  color: #0073e6;
+  font-weight: 600;
+  border-left: 4px solid transparent;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background: #f0f6ff;
+  border-left-color: #0073e6;
+}
+
+/* Main content */
+.content {
+  flex-grow: 1;
+  padding: 32px 40px;
+  background: white;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.05);
+}
+
+/* Cards */
+.cards {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 32px;
+}
+.card {
+  background: #f7faff;
+  padding: 24px 28px;
+  border-radius: 10px;
+  width: 100%;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.06);
+  transition: background 0.2s;
+  cursor: default;
+}
+.card:hover {
+  background: #e9f1ff;
+}
+.card h2 {
+  color: #0073e6;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.card .number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #0747a6;
+}
+
+/* Recent orders */
+.recent-orders h2 {
+  margin-bottom: 18px;
+  font-weight: 700;
+  color: #0073e6;
+  font-size: 1.3rem;
+}
+.recent-orders table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+.recent-orders table th,
+.recent-orders table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+}
+.recent-orders table tbody tr:hover {
+  background: #f5faff;
+}
+
+/* Status labels */
+.status {
+  padding: 6px 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.status.success {
+  background: #d6f5d6;
+  color: #207520;
+}
+.status.warning {
+  background: #fff7d6;
+  color: #7a6e20;
+}
+.status.error {
+  background: #ffd6d6;
+  color: #a01616;
+}
+
+
+      /* --- Стили для login.html --- */
+/* Фон затемняет весь экран, чтобы выделить окно */
+.wnd_dlg_back {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Окно логина */
+.login {
+  background: #fff;
+  padding: 30px 36px 36px 36px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  width: 380px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Заголовок */
+.login .title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1E5BB7;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Метки полей формы */
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #05306A;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* Поля ввода */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  border: 1px solid #d3dde6;
+  border-radius: 8px;
+  background: #fafcff;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: #1E5BB7;
+  box-shadow: 0 0 6px #a1c3ff;
+}
+
+/* Кнопка входа */
+.login_button {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #1E5BB7;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.login_button:hover {
+  background-color: #164d8d;
+}
+
+/* Центрирование кнопки */
+form p[align="center"] {
+  margin-top: 20px;
+}
+
+/* Кнопка "Отмена" */
+a.logout-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 14px 0;
+  margin-top: 11px;
+  background: #f4f7fa;
+  color: #1E5BB7;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 2px solid #1E5BB7;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+a.logout-btn:hover {
+  background: #e7eaf1;
+  color: #164d8d;
+  border-color: #164d8d;
+}
+
+      /*--- Стили для users.html ---*/
+/* Таблица пользователей */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.users-table th, .users-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+}
+.users-table thead th {
+  background: #f0f6ff;
+  color: #1E5BB7;
+  font-weight: 700;
+  font-size: 1.03rem;
+}
+.users-table tbody tr:hover {
+  background: #f7faff;
+}
+.users-actions {
+  text-align: right;
+}
+.add-user-btn {
+  display: inline-block;
+  background: #1E5BB7;
+  color: #fff;
+  font-size: 1.07rem;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-bottom: 8px;
+  transition: background 0.17s;
+}
+.add-user-btn:hover {
+  background: #184e9b;
+}
+
+/* Кнопки действий */
+.user-action-btn {
+  display: inline-block;
+  background: #f4f7fa;
+  color: #1E5BB7;
+  font-size: 0.96rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 7px;
+  margin-right: 8px;
+  text-decoration: none;
+  border: 1.5px solid #1E5BB7;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.user-action-btn:hover {
+  background: #e7eaf1;
+  color: #164d8d;
+  border-color: #164d8d;
+}
+.user-action-btn.delete {
+  color: #a33c3c;
+  border-color: #a33c3c;
+}
+.user-action-btn.delete:hover {
+  background: #ffd6d6;
+  color: #a33c3c;
+  border-color: #a33c3c;
+}
+
+
+     /*--- Стили для products.html ---*/
+.products-actions {
+  margin-bottom: 22px;
+  display: flex;
+  gap: 18px;
+}
+.add-category-btn, .add-subcategory-btn, .add-product-btn {
+  background: #1E5BB7;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.03rem;
+  border-radius: 8px;
+  padding: 10px 19px;
+  text-decoration: none;
+  transition: background 0.18s;
+  box-shadow: 0 1.5px 7px rgba(30,91,183,0.03);
+}
+.add-category-btn:hover, .add-subcategory-btn:hover, .add-product-btn:hover {
+  background: #184e9b;
+}
+
+.categories-list {
+  margin-top: 6px;
+}
+.category-block {
+  margin-bottom: 32px;
+  padding: 19px 21px;
+  border-radius: 13px;
+  background: #f9fbff;
+  box-shadow: 0 2px 10px rgba(0,81,211,0.04);
+}
+.category-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 1.14rem;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ebebeb;
+  margin-bottom: 12px;
+}
+.subcategory-block {
+  margin: 17px 0 0 16px;
+  padding: 0 0 6px 0;
+}
+.subcategory-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 1.01rem;
+  color: #1376ca;
+  background: #f3f6fb;
+  padding: 7px 12px 7px 16px;
+  border-radius: 7px;
+  margin-bottom: 8px;
+}
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0 16px 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  font-size: 1rem;
+  overflow: hidden;
+}
+.products-table th, .products-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+}
+.products-table thead th {
+  background: #f0f6ff;
+  color: #1E5BB7;
+  font-weight: 700;
+  font-size: 0.99rem;
+}
+.products-table tbody tr:hover {
+  background: #f7faff;
+}
+
+/* Кнопки действий с сущностями */
+.entity-action-btn {
+  display: inline-block;
+  margin-right: 6px;
+  background: #f4f7fa;
+  color: #1E5BB7;
+  border: 1.5px solid #1E5BB7;
+  border-radius: 7px;
+  font-size: 0.97rem;
+  font-weight: 600;
+  padding: 8px 15px;
+  text-decoration: none;
+  transition: background 0.13s, color 0.13s;
+}
+.entity-action-btn:hover {
+  background: #e7eaf1;
+  color: #184e9b;
+}
+.entity-action-btn.delete {
+  color: #a33c3c;
+  border-color: #a33c3c;
+}
+.entity-action-btn.delete:hover {
+  background: #ffd6d6;
+  color: #a33c3c;
+}
+.entity-action-btn.add {
+  color: #246d32;
+  border-color: #246d32;
+}
+.entity-action-btn.add:hover {
+  background: #d6f5d6;
+  color: #246d32;
+}
+
+
+     /*--- Стили для product_form.html ---*/
+.form-container {
+  background: #fff;
+  padding: 28px 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  max-width: 680px;
+  margin: 24px 0;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #05306A;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border: 1px solid #d3dde6;
+  border-radius: 8px;
+  background: #fafcff;
+  transition: border-color 0.22s, box-shadow 0.22s;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.form-textarea {
+  min-height: 80px;
+  height: auto;
+  width: 100%;
+  resize: vertical;     /* Чтобы пользователь мог растягивать */
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d3dde6;
+  border-radius: 8px;
+  background: #fafcff;
+  transition: border-color 0.22s, box-shadow 0.22s;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.form-input::-webkit-outer-spin-button,
+.form-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #1E5BB7;
+  box-shadow: 0 0 0 3px rgba(30,91,183,0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.form-file {
+  display: block;
+  padding: 10px 0;
+  font-size: 0.98rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.88rem;
+  color: #7a7a7a;
+}
+
+.form-actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.btn-submit {
+  background: #1E5BB7;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.08rem;
+  padding: 13px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.btn-submit:hover {
+  background: #184e9b;
+}
+
+.btn-cancel {
+  background: #f4f7fa;
+  color: #1E5BB7;
+  font-weight: 600;
+  font-size: 1.08rem;
+  padding: 13px 28px;
+  border: 2px solid #1E5BB7;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.18s, color 0.18s;
+}
+
+.btn-cancel:hover {
+  background: #e7eaf1;
+  color: #164d8d;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.category-content.collapsed,
+.subcategory-content.collapsed{
+  display: none;
+}

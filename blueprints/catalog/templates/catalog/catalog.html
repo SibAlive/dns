@@ -1,0 +1,65 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link type="text/css" href="{{ url_for('catalog.static', filename='css/styles.css') }}" rel="stylesheet" />
+
+<div class="catalog-container">
+    <h1 class="catalog-title">Каталог товаров</h1>
+
+  {#    breadcrumbds#}
+  <nav arial-label="breadcrumb">
+      <ol class="breadcrumb">
+          {% for item in breadcrumbs %}
+            <li class="breadcrumb-item">
+            {% if item.endpoint %}
+                <a href="{{ url_for(item.endpoint) }}">{{ item.name }}</a>
+            {% else %}
+                {{ item.name }}
+            {% endif %}
+            </li>
+          {% endfor %}
+      </ol>
+  </nav>
+
+    <div class="categories-grid">
+      <!-- Категории -->
+        {% for category in categories %}
+          <div class="category-card">
+            {% if not cat_slug_if_subcats %}
+              {% if category.cat.picture %}
+                <img src="{{ url_for('catalog.static', filename='images/' + category.cat.picture) }}" alt="{{ category.cat.name }}" class="category-image">
+              {% endif %}
+
+              <div class="category-title">{{ category.cat.name }}</div>
+                <ul class="subcategory-list">
+                  <li class="category-item"><a href="{{
+                          url_for('catalog.subcategory',
+                          category_slug=category.cat.slug) }}"
+                                               class="subcategory-link">{{ category.cat.name }}</a></li>
+                  {% for subcat in category.subcat %}
+                    <li class="subcategory-item"><a href="{{
+                            url_for('catalog.products',
+                            category_slug=category.cat.slug,
+                            subcategory_slug=subcat.slug) }}"
+                                                class="subcategory-link">{{ subcat.name }}</a></li>
+                  {% endfor %}
+                </ul>
+            {% else %}
+                {% if category.picture %}
+                    <a href="{{ url_for(
+                    'catalog.products',
+                    subcategory_slug=category.slug) }}" class="no-underline">
+                        <img src="{{ url_for('catalog.static', filename='images/' + category.picture) }}" alt="{{ category.name }}" class="subcategory-image">
+                {% endif %}
+                <div class="subcategory-title">{{ category.name }}</div>
+                    </a>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+
+      <!-- Добавьте остальные категории аналогично -->
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,133 @@
+from sqlalchemy.orm import relationship
+
+from extensions import db
+
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    surname = db.Column(db.Text, nullable=False)
+    name = db.Column(db.Text, nullable=False)
+    email = db.Column(db.Text, nullable=False, unique=True)
+    phone = db.Column(db.String, nullable=True, unique=True)
+    psw = db.Column(db.Text, nullable=False)
+    avatar = db.Column(db.LargeBinary, default=None)
+    time = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+
+    cart_item = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
+    favorite = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
+    order = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+
+
+class Category(db.Model):
+    __tablename__ = "categories"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False)
+    picture = db.Column(db.Text, nullable=False)
+
+    subcategory = relationship("SubCategory", back_populates="category", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="category", cascade="all, delete-orphan")
+
+
+class SubCategory(db.Model):
+    __tablename__ = "sub_categories"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False)
+    picture = db.Column(db.Text, nullable=False)
+
+    category = relationship("Category", back_populates="subcategory")
+    products = relationship("Product", back_populates="subcategory", cascade="all, delete-orphan")
+
+
+class Product(db.Model):
+    __tablename__ = "products"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True)
+    subcategory_id = db.Column(db.Integer, db.ForeignKey("sub_categories.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    picture = db.Column(db.Text, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    stock_quantity = db.Column(db.Integer, default=0) # Остатки на складе
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now()) # Дата создания
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now(), onupdate=db.func.now()) # Дата посл. обновления
+    sku = db.Column(db.String, nullable=True) # Артикул товара
+    weight = db.Column(db.Float, nullable=True) # Вес товара
+
+    cart_item = relationship("CartItem", back_populates="products")
+    favorite = relationship("Favorite", back_populates="products")
+    order_item = relationship("OrderItem", back_populates="products", cascade="all, delete-orphan")
+
+    category = relationship("Category", back_populates="products")
+    subcategory = relationship("SubCategory", back_populates="products")
+
+
+class CartItem(db.Model):
+    """Корзина товаров"""
+    __tablename__ = "cart_items"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False, server_default='1')
+
+    user = relationship("User", back_populates="cart_item")
+    products = relationship("Product", back_populates="cart_item")
+
+
+class Favorite(db.Model):
+    """Избранное"""
+    __tablename__ = "favorites"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    user = relationship("User", back_populates="favorite")
+    products = relationship("Product", back_populates="favorite")
+
+class Order(db.Model):
+    """Заказы"""
+    __tablename__ = "orders"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"),
+                        nullable=False, index=True)
+    status = db.Column(db.String, nullable=False)
+    total_amount = db.Column(db.Float, nullable=False) # Общая стоимость заказа
+    payment_method = db.Column(db.String, nullable=False) # Способ оплаты
+    shipping_method = db.Column(db.String, nullable=False) # Способ доставки
+    shipping_address = db.Column(db.String, nullable=True) # Адрес доставки
+    comment = db.Column(db.Text, nullable=True) # Комментарий к заказу
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())  # Дата создания
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now(),
+                           onupdate=db.func.now())  # Дата посл. обновления
+    paid_at = db.Column(db.DateTime(timezone=True), nullable=True)  # Дата оплаты
+
+    order_item = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+    user = relationship("User", back_populates="order")
+
+class OrderItem(db.Model):
+    """Список товаров в заказе"""
+    __tablename__ = "order_items"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id", ondelete="CASCADE"),
+                        nullable=False, index=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"),
+                        nullable=False, index=True)
+    name = db.Column(db.String, nullable=False) # Наименование товара на момент заказа
+    price = db.Column(db.Float, nullable=False) # Цена товара на момент заказа
+    quantity = db.Column(db.Integer, nullable=False) # Количество
+    total_price = db.Column(db.Float, nullable=False)
+
+    order = relationship("Order", back_populates="order_item")
+    products = relationship("Product", back_populates="order_item")

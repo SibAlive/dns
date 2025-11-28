@@ -1,0 +1,126 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('catalog.static', filename='css/styles.css') }}">
+
+<div class="dns-container">
+    <header>
+        <img src="https://cdn.dns-shop.ru/img/logo.svg" alt="DNS" class="dns-logo">
+        <div class="order-summary">
+            <span>Оформляем товаров: {{ order_quantity }}</span>
+            <span class="order-total">за <b>{{ '{:,.0f}'.format(order_total).replace(',', ' ') }} ₽</b></span>
+        </div>
+    </header>
+
+    <section class="order-product">
+        {% for item in order_items %}
+            <div class="product-line">
+                <div class="product-name-qty">
+                    <span>{{ item.products.name }}</span>
+                    <span class="product-qty">({{ item.quantity }}&nbsp;шт.)</span>
+                </div>
+                {% set price = item.products.price * item.quantity %}
+                <span class="product-price">{{ '{:,.0f}'.format(price).replace(',', ' ')}} ₽</span>
+            </div>
+        {% endfor %}
+    </section>
+
+
+    <form method="post" action="" class="order-form">
+    {{ form.hidden_tag() }}
+
+        <section class="contacts">
+            <div class="form-group">
+                {{ form.phone.label }}
+                {{ form.phone(class="form-control", readonly=phone_readonly) }}
+                {% if form.phone.errors %}
+                    <div class="error">{{ form.phone.errors[0] }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control", readonly=True) }}
+                {% if form.email.errors %}
+                    <div class="error">{{ form.email.errors[0] }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+    <!-- Способ оплаты -->
+        <section class="form-section">
+            <h2 class="section-title">Выберите способ оплаты</h2>
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="payment_method" value="Онлайн" checked>
+                    Онлайн
+                </label>
+                <label>
+                    <input type="radio" name="payment_method" value="При получении">
+                    При получении
+                </label>
+            </div>
+            {% if form.payment_method.errors %}
+                <div class="error">{{ form.payment_method.errors[0] }}</div>
+            {% endif %}
+        </section>
+
+    <!-- Способ получения -->
+        <section class="form-section">
+            <h2 class="section-title">Выберите способ доставки</h2>
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="delivery_method" value="Самовывоз" checked>
+                    Самовывоз
+                </label>
+                <label>
+                    <input type="radio" name="delivery_method" value="Доставка">
+                    Доставка
+                </label>
+            </div>
+            {% if form.delivery_method.errors %}
+                <div class="error">{{ form.delivery_method.errors[0] }}</div>
+            {% endif %}
+        </section>
+
+        <div class="form-group" id="address-group" style="display:none">
+            {{ form.shipping_address.label(class='form-label') }}
+            {{ form.shipping_address(class='form-control', placeholder="Адрес доставки") }}
+            {% if form.shipping_address.errors %}
+                <div class="error">{{ form.shipping_address.errors[0] }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.comment.label(class='form-label') }}
+            {{ form.comment(class='form-textarea', placeholder="Введите комментарий") }}
+        </div>
+
+        <!-- Скрытые поля -->
+        <input type="hidden" name="total_amount" value="{{ order_total }}">
+
+        {% if order_items %}
+            <button type="submit" class="submit-btn">Оформить заказ</button>
+        {% endif %}
+    </form>
+</div>
+
+{#Скрипт отображает поле ввода адреса при выборе доставки#}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deliveryRadios = document.querySelectorAll('input[name="delivery_method"]');
+    const addressGroup = document.getElementById('address-group');
+
+    function toggleAddressField() {
+        const isDelivery = Array.from(deliveryRadios).some(r => r.checked && r.value === 'delivery');
+        addressGroup.style.display = isDelivery ? 'block' : 'none';
+        document.querySelector('#address-group input').required = isDelivery;
+}
+
+    deliveryRadios.forEach(radio => {
+        radio.addEventListener('change', toggleAddressField);
+    });
+    toggleAddressField(); // set initial state
+});
+</script>
+
+{% endblock %}

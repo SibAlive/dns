@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link type="text/css" href="{{ url_for('header.static', filename='css/styles.css') }}" rel="stylesheet" />
+    <title>Интернет-магазин цифровой электроники</title>
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+  <header>
+    <div class="header-container">
+      <!-- Левая часть -->
+      <div class="header-left">
+        <a href="/" class="logo">DNS</a>
+        <nav class="nav-links">
+          <a href="/promotions" class="nav-link">Акции</a>
+          <a href="/stores" class="nav-link">Магазины</a>
+          <a href="/delivery" class="nav-link">Доставка</a>
+          <a href="/vacancies" class="nav-link">Вакансии</a>
+        </nav>
+      </div>
+
+      <!-- Правая часть -->
+      <div class="header-right">
+        <a href="{{ url_for("catalog.catalog_index") }}" class="icon-btn" title="Каталог">
+          <span class="icon-catalog"></span>
+          <span class="icon-text"> Каталог</span>
+        </a>
+
+        <a href="{{ url_for('catalog.favorite') }}" class="icon-btn" title="Избранное">
+          <span class="icon-favorites"></span>
+          <span class="icon-text">Избранное</span>
+        </a>
+
+        <a href="{{ url_for('catalog.cart') }}" class="icon-btn" title="Корзина">
+          <span class="icon-cart"></span>
+          <span class="icon-text">Корзина</span>
+          <span class="badge">2</span>
+        </a>
+
+        <a href={{ url_for("catalog.orders") }} class="icon-btn" title="Заказы">
+          <span class="icon-cart"></span>
+          <span class="icon-text">Заказы</span>
+        </a>
+
+        <a href={{ url_for("header.login") }} class="icon-btn" title="Войти">
+          <span class="icon-notification"></span>
+          <span class="icon-text">Личный кабинет</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+
+<link rel="stylesheet" href="{{ url_for('catalog.static', filename='css/styles.css') }}">
+
+
+{% if random_products %}
+<div class="catalog-container">
+    <h1 class="catalog-title">Наши товары</h1>
+
+    <div class="products-grid-home">
+          {% for product in random_products %}
+            <div class="products-card">
+                <a href="{{ url_for(
+                        'catalog.product',
+                        product_slug=product.slug) }}" class="no-underline">
+                  <div class="products-header">
+                    <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="products-img">
+                  </div>
+                  <div class="products-title">
+                    {{ product.name }}
+                  </div>
+                </a>
+                  <div class="products-purchase-row">
+                    <span class="products-price">{{ '{:,.0f}'.format(product.price).replace(',', ' ') }} ₽</span>
+                      {% set is_favorite = product.id in favorite_ids %}
+                            <button class="fav-btn favorite-toggle-btn {% if is_favorite %} is-fav {% endif %}"
+                                    data-product-id="{{ product.id }}">
+                                &#10084;
+                            </button>
+                    <button class="products-cart"></button>
+                  </div>
+              <div class="products-stores">
+                  {% if product.stock_quantity %}
+                    В наличии
+                  {% else %}
+                    Нет в наличии
+                  {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{#    --- Подключаем скрипт для кнопки избранное ---#}
+<script>
+    window.toggleFavoriteUrl = "{{ url_for('catalog.toggle_favorite') }}";
+    window.csrfToken = "{{ csrf_token() }}";
+</script>
+<script src="{{ url_for('catalog.static', filename='js/favorites.js') }}"></script>
+
+{% block content %}
+{% endblock %}
+
+</body>
+</html>

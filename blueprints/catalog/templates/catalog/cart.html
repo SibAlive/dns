@@ -1,0 +1,61 @@
+{% extends "header/base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('catalog.static', filename='css/styles.css') }}">
+
+<div class="cart-container">
+    <h1 class="cart-title">Ваша корзина</h1>
+    {% if cart_items %}
+    <div class="cart-list">
+        {% for item in cart_items %}
+          <div class="cart-card">
+            <div class="cart-img-box">
+              <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
+                  <img src="{{ url_for('catalog.static', filename='images/' + item.products.picture) }}"
+                       alt="{{ item.products.name }}" class="cart-img"></a>
+            </div>
+            <div class="cart-info">
+              <div class="cart-prod-name">
+                  <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
+                      {{ item.products.name }}</a>
+              </div>
+              <div class="cart-prod-desc">{{ item.products.description.replace('\n', '<br>') | safe }}</div>
+              <div class="cart-price-row">
+                  <span class="cart-prod-price">{{ '{:,.0f}'.format(item.products.price).replace(',', ' ') }} ₽</span>
+                  <span class="cart-prod-qty">× {{ item.quantity }} шт.</span>
+              </div>
+              <div class="cart-actions-row">
+                <form method="post" action="{{ url_for('catalog.add_to_cart', product_id=item.product_id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                  <button type="submit" class="buy-btn">Добавить</button>
+                </form>
+
+                <form method="post" action="{{ url_for('catalog.remove_from_cart', product_id=item.product_id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                  <button type="submit" class="cart-remove-btn">Удалить</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+    <div class="cart-summary">
+        <div class="cart-summary-row">
+            <span>Товаров: {{ cart_quantity }}, на сумму:</span>
+            <strong>{{ '{:,.0f}'.format(cart_total).replace(',', ' ') }} ₽</strong>
+        </div>
+    </div>
+
+    <div class="cart-bottom-actions">
+        <a href="{{ url_for('catalog.catalog_index') }}" class="cart-bottom-btn">Продолжить покупки</a>
+        <a href="{{ url_for('catalog.order') }}" class="cart-order-btn">Оформить заказ</a>
+    </div>
+    {% else %}
+        <div class="cart-empty">Ваша корзина пуста</div>
+
+        <div class="cart-bottom-actions">
+            <a href="{{ url_for('catalog.catalog_index') }}" class="cart-bottom-btn">Перейти в каталог</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
