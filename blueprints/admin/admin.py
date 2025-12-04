@@ -4,9 +4,10 @@ from flask import (Blueprint, request, redirect, url_for, flash,
 from werkzeug.utils import secure_filename
 
 from extensions import db
-from models import User, Category, SubCategory, Product
+from models import Category, SubCategory
 from services import ProductService, create_path_for_file
 from forms import CategoryForm, CategoryEditForm, ProductForm, ProductEditForm
+
 
 admin = Blueprint(
     'admin',
@@ -50,7 +51,7 @@ def logout():
 
 @admin.before_request
 def require_login():
-    """Функция запрещает вход НЕадминистратору на любую страницу админ-панели (кроме выбранных)"""
+    """Функция запрещает вход НЕ администратору на любую страницу админ-панели (кроме выбранных)"""
     allowed_endpoints = ('admin.login', 'admin.static')
     if not isLogged() and request.endpoint not in allowed_endpoints:
         return redirect(url_for('admin.login'))
@@ -107,8 +108,8 @@ def products():
     )
 
 @admin.route('/create_category', methods=['GET', 'POST'])
-@admin.route('/create_category/<cat_id>', methods=['GET', 'POST'])
-def create_category(cat_id=None):
+@admin.route('/create_category/<cat_slug>', methods=['GET', 'POST'])
+def create_category(cat_slug=None):
     if not isLogged():
         return redirect(url_for('admin.login'))
     """Функция создает категорию. Если передан аргумент cat_id, то создается подкатегория"""
@@ -116,7 +117,7 @@ def create_category(cat_id=None):
     product_service = ProductService(db)
 
     if form.validate_on_submit():
-        if not cat_id:
+        if not cat_slug:
             ok = product_service.create_category(form=form, object=Category)
             if not ok:
                 flash("Категория с указанным именем уже существует!", category="danger")
@@ -126,6 +127,7 @@ def create_category(cat_id=None):
                 )
             flash("Категория создана!", category="success")
         else:
+            cat_id = product_service.get_category_by_slug(cat_slug=cat_slug).id
             ok = product_service.create_category(form=form, object=SubCategory, cat_id=cat_id)
             if not ok:
                 flash("Подкатегория с указанным именем уже существует!", category="danger")
@@ -137,40 +139,70 @@ def create_category(cat_id=None):
 
         # Сохраняем фото на диск
         file = form.picture.data
-        filename = secure_filename(file.filename)
-        filepath = create_path_for_file(current_app, 'catalog', filename)
+        file_name = secure_filename(file.filename)
+        filepath = create_path_for_file(current_app,
+                                        subfolders='categories',
+                                        file_name=file_name) \
+            if not cat_slug else create_path_for_file(current_app,
+                                                      subfolders=['subcategories', cat_slug],
+                                                      file_name=file_name
+                                                      )
         file.save(filepath)
         flash('Фото успешно загружено!', category="success")
 
         return redirect(url_for('admin.products'))
 
-    title = "Добавить категорию" if not cat_id else "Добавить подкатегорию"
+    title = "Добавить категорию" if not cat_slug else "Добавить подкатегорию"
     return render_template(
         'admin/category_form.html',
         form=form,
         title=title
     )
 
-@admin.route('/edit_category/<cat_slug>', methods=['GET', 'POST'])
-def edit_category(cat_slug):
+@admin.route('/edit_category/<slug>', methods=['GET', 'POST'])
+def edit_category(slug):
     product_service = ProductService(db)
     is_subcategory = request.args.get('is_subcategory')
     if not is_subcategory:
-        category = product_service.get_category_by_slug(cat_slug=cat_slug)
+        category = product_service.get_category_by_slug(cat_slug=slug)
         title = "Редактировать категорию"
     else:
-        category = product_service.get_subcategory_by_slug(slug=cat_slug)
+        category = product_service.get_subcategory_by_slug(subcat_slug=slug)
         title = "Редактировать подкатегорию"
+        cat_slug = product_service.get_category_by_subcategory_slug(subcat_slug=slug).slug
     form = CategoryEditForm(obj=category)
+
+    # Получаем путь к текущему фото
+    file_path = create_path_for_file(current_app,
+                                     subfolders='categories',
+                                     file_name=category.picture
+                                     ) \
+        if not is_subcategory else create_path_for_file(current_app,
+                                                        subfolders=['subcategories', cat_slug],
+                                                        file_name=category.picture)
+
 
     if form.validate_on_submit():
         product_service.edit_category(form=form, category=category)
-        # Если загружено новое фото, сохраняем его
+        # Если загружено новое фото
         if form.picture.data:
+            # Удаляем старое фото
+            try:
+                os.remove(file_path)
+            except FileNotFoundError:
+                flash("Не удается найти указанный файл", category="error")
+
+            # Загружаем новое фото
             file = form.picture.data
-            filename = secure_filename(file.filename)
-            filepath = create_path_for_file(current_app, 'catalog', filename)
-            file.save(filepath)
+            file_name = secure_filename(file.filename)
+            file_path = create_path_for_file(current_app,
+                                            subfolders='categories',
+                                            file_name=file_name
+                                            ) \
+                if not is_subcategory else create_path_for_file(current_app,
+                                                          subfolders=['subcategories', cat_slug],
+                                                          file_name=file_name)
+            file.save(file_path)
             flash('Фото успешно обновлено!', category="success")
 
         return redirect(url_for('admin.products'))
@@ -183,37 +215,48 @@ def edit_category(cat_slug):
     )
 
 
-@admin.route('/delete_category/<int:cat_id>', methods=['POST'])
-def delete_category(cat_id):
+@admin.route('/delete_category/<slug>', methods=['POST'])
+def delete_category(slug):
     product_service = ProductService(db)
     is_subcategory = request.args.get('is_subcategory')
     object = Category if not is_subcategory else SubCategory
 
-    # Удаляем запись в БД и получаем название фото
-    file_name = product_service.delete_category(cat_id=cat_id, object=object)
-
-    # Проверяем, есть ли товары в категории
-    if not file_name:
-        return redirect(url_for('admin.products'))
-
     # Удаляем фото
-    file_path = create_path_for_file(current_app, 'catalog', file_name)
+    cat_slug = product_service.get_category_by_subcategory_slug(subcat_slug=slug).slug
+    file_name = product_service.get_subcategory_by_slug(subcat_slug=slug).picture
+    file_path = create_path_for_file(current_app,
+                                     subfolders='categories',
+                                     file_name=file_name
+                                     ) \
+        if not is_subcategory else create_path_for_file(current_app,
+                                                        subfolders=['subcategories', cat_slug],
+                                                        file_name=file_name)
     try:
         os.remove(file_path)
     except FileNotFoundError:
         flash("Не удается найти указанный файл", category="error")
 
+    # Удаляем запись в БД
+    product_service.delete_category(cat_slug=slug, object=object)
+
+    # Проверяем, есть ли товары в категории
+    if not file_name:
+        return redirect(url_for('admin.products'))
+
     return redirect(url_for('admin.products'))
 
 
-@admin.route('/create_product/<int:cat_id>/<int:subcat_id>', methods=['GET', 'POST'])
-def create_product(cat_id, subcat_id):
+@admin.route('/create_product/<cat_slug>/<subcat_slug>', methods=['GET', 'POST'])
+def create_product(cat_slug, subcat_slug):
     """Функция создает товар"""
     form = ProductForm()
     product_service = ProductService(db)
 
     if form.validate_on_submit():
         # Проверяем уникальность наименования товара
+        cat_id = product_service.get_category_by_slug(cat_slug=cat_slug).id
+        subcat_id = product_service.get_subcategory_by_slug(subcat_slug=subcat_slug).id
+
         ok = product_service.create_product(form=form, cat_id=cat_id, subcat_id=subcat_id)
         if not ok:
             flash("Товар с указанным именем уже существует!", category="danger")
@@ -224,9 +267,12 @@ def create_product(cat_id, subcat_id):
 
         # Сохраняем фото на диск
         file = form.picture.data
-        filename = secure_filename(file.filename)
-        filepath = create_path_for_file(current_app, 'catalog', filename)
-        file.save(filepath)
+        file_name = secure_filename(file.filename)
+        file_path = create_path_for_file(current_app,
+                                         subfolders=['products', cat_slug, subcat_slug],
+                                         file_name=file_name
+                                         )
+        file.save(file_path)
         flash('Фото успешно загружено!', category="success")
 
         flash("Товар создан!", category="success")
@@ -251,9 +297,14 @@ def edit_product(product_slug):
         # Если загружено новое фото, сохраняем его
         if form.picture.data:
             file = form.picture.data
-            filename = secure_filename(file.filename)
-            filepath = create_path_for_file(current_app, 'catalog', filename)
-            file.save(filepath)
+            file_name = secure_filename(file.filename)
+            cat_slug = product.category.slug
+            subcat_slug = product.subcategory.slug
+            file_path = create_path_for_file(current_app,
+                                             subfolders=['products', cat_slug, subcat_slug],
+                                             file_name=file_name
+                                             )
+            file.save(file_path)
             flash('Фото успешно обновлено!', category="success")
 
         return redirect(url_for('admin.products'))
@@ -265,15 +316,21 @@ def edit_product(product_slug):
         title="Редактировать товар"
     )
 
-@admin.route('/delete_product/<int:product_id>', methods=['POST'])
-def delete_product(product_id):
+@admin.route('/delete_product/<product_slug>', methods=['POST'])
+def delete_product(product_slug):
     product_service = ProductService(db)
 
     # Удаляем запись в БД и получаем название фото
-    file_name = product_service.delete_product(product_id=product_id)
+    file_name = product_service.delete_product(product_slug=product_slug)
 
     # Удаляем фото
-    file_path = create_path_for_file(current_app, 'catalog', file_name)
+    product = product_service.get_product_by_slug(product_slug=product_slug)
+    cat_slug = product.category.slug
+    subcat_slug = product.subcategory.slug
+    file_path = create_path_for_file(current_app,
+                                     subfolders=['products', cat_slug, subcat_slug],
+                                     file_name=file_name
+                                     )
     try:
         os.remove(file_path)
     except FileNotFoundError:

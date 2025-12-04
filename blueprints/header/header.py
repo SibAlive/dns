@@ -1,4 +1,3 @@
-from dns.message import make_response
 from flask import (Blueprint, request, redirect, url_for, flash,
                    render_template, make_response, session)
 from flask_login import (login_user, login_required,
@@ -8,7 +7,7 @@ from werkzeug.security import check_password_hash
 from extensions import db
 from forms import RegisterForm, LoginForm, EditProfileForm
 from services import (UserService, ProductService, transfer_guest_cart_to_user,
-                      transfer_guest_favorite_to_user)
+                      transfer_guest_favorite_to_user, CartService)
 from UserLogin import UserLogin
 
 
@@ -24,8 +23,14 @@ header = Blueprint(
 @header.route('/')
 def index():
     product_service = ProductService(db)
+    cart_service = CartService(db)
     random_products = product_service.get_random_products()
-    return render_template("header/base.html", random_products=random_products)
+    cart_len = len(cart_service.get_cart_items(user_id=current_user.get_id()))
+    return render_template(
+        "header/base.html",
+        random_products=random_products,
+        cart_len=cart_len
+    )
 
 @header.route('/register', methods=['GET', 'POST'])
 def register():

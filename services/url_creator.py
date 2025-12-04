@@ -17,15 +17,15 @@ class Database:
     password: str
 
 # URL для подключения к служебной БД 'postgres' для создания новой базы данных
-_db = Database(
-    database="postgres",
-    host = "localhost",
-    port = 5432,
-    user = "postgres",
-    password = "Iskitimec94"
-)
+db_main = Database(
+    database=env("POSTGRES_MAIN_DB"),
+    host=env("POSTGRES_MAIN_HOST"),
+    port=env.int("POSTGRES_MAIN_PORT", 5432),
+    user=env("POSTGRES_MAIN_USER"),
+    password=env("POSTGRES_MAIN_PASSWORD")
+    )
 
-db = Database(
+db_new = Database(
     database=env("POSTGRES_DB"),
     host=env("POSTGRES_HOST"),
     port=env.int("POSTGRES_PORT", 5432),
@@ -35,14 +35,12 @@ db = Database(
 
 DATABASE_URL_FOR_FLASK = (
     f"postgresql+psycopg2://"
-    f"{db.user}:{db.password}@"
-    f"{db.host}:{db.port}/{db.database}"
+    f"{db_new.user}:{db_new.password}@"
+    f"{db_new.host}:{db_new.port}/{db_new.database}"
 )
 
 ADMIN_USERNAME = env("ADMIN_USERNAME", 'admin')
 ADMIN_PASSWORD = env("ADMIN_PASSWORD", 'password')
-
-
 
 
 # Создаем асинхронный движок SQLAlchemy

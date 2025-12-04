@@ -33,7 +33,7 @@
 {#        <img src="thumb5.jpg" class="gallery-thumb">#}
 {#      </div>#}
       <div class="gallery-main">
-        <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="gallery-main-img">
+        <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="gallery-main-img">
       </div>
     </aside>
 

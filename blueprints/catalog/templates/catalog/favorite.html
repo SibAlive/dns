@@ -15,7 +15,7 @@
       <div class="cart-card-dns">
         <div class="cart-imgbox-dns">
           <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
-              <img src="{{ url_for('catalog.static', filename='images/' + item.products.picture) }}"
+              <img src="{{ url_for('catalog.static', filename='images/products/' ~ item.products.category.slug ~ '/' ~ item.products.subcategory.slug ~ '/' ~ item.products.picture) }}"
                    alt="{{ item.products.name }}" class="cart-img-dns"></a>
     {#      {% if item.products.discount %}#}
     {#        <span class="cart-label-dns discount">-{{ item.products.discount }}%</span>#}

@@ -32,7 +32,7 @@
 
       <!-- Правая часть -->
       <div class="header-right">
-        <a href="{{ url_for("catalog.catalog_index") }}" class="icon-btn" title="Каталог">
+        <a href="{{ url_for('catalog.catalog_index') }}" class="icon-btn" title="Каталог">
           <span class="icon-catalog"></span>
           <span class="icon-text"> Каталог</span>
         </a>
@@ -45,15 +45,17 @@
         <a href="{{ url_for('catalog.cart') }}" class="icon-btn" title="Корзина">
           <span class="icon-cart"></span>
           <span class="icon-text">Корзина</span>
-          <span class="badge">2</span>
+          {% if cart_len %}
+            <span class="badge">{{ cart_len }}</span>
+          {% endif %}
         </a>
 
-        <a href={{ url_for("catalog.orders") }} class="icon-btn" title="Заказы">
+        <a href="{{ url_for('catalog.orders') }}" class="icon-btn" title="Заказы">
           <span class="icon-cart"></span>
           <span class="icon-text">Заказы</span>
         </a>
 
-        <a href={{ url_for("header.login") }} class="icon-btn" title="Войти">
+        <a href="{{ url_for('header.login') }}" class="icon-btn" title="Войти">
           <span class="icon-notification"></span>
           <span class="icon-text">Личный кабинет</span>
         </a>
@@ -76,7 +78,7 @@
                         'catalog.product',
                         product_slug=product.slug) }}" class="no-underline">
                   <div class="products-header">
-                    <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="products-img">
+                    <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="products-img">
                   </div>
                   <div class="products-title">
                     {{ product.name }}

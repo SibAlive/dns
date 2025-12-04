@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addressGroup = document.getElementById('address-group');
 
     function toggleAddressField() {
-        const isDelivery = Array.from(deliveryRadios).some(r => r.checked && r.value === 'delivery');
+        const isDelivery = Array.from(deliveryRadios).some(r => r.checked && r.value === 'Доставка');
         addressGroup.style.display = isDelivery ? 'block' : 'none';
         document.querySelector('#address-group input').required = isDelivery;
 }

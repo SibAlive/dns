@@ -19,12 +19,12 @@
             </div>
 
             <div>
-              <a href="{{ url_for('admin.edit_category', cat_slug=item.category.slug) }}" class="entity-action-btn">Редактировать категорию</a>
-              <form method="POST" action="{{ url_for('admin.delete_category', cat_id=item.category.id) }}" style="display:inline">
+              <a href="{{ url_for('admin.edit_category', slug=item.category.slug) }}" class="entity-action-btn">Редактировать категорию</a>
+              <form method="POST" action="{{ url_for('admin.delete_category', slug=item.category.slug) }}" style="display:inline">
                   <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                   <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить категорию?')">Удалить категорию</button>
               </form>
-              <a href="{{ url_for('admin.create_category', cat_id=item.category.id) }}" class="entity-action-btn add">Добавить подкатегорию</a>
+              <a href="{{ url_for('admin.create_category', cat_slug=item.category.slug) }}" class="entity-action-btn add">Добавить подкатегорию</a>
             </div>
           </div>
 
@@ -41,15 +41,15 @@
                   <span>Подкатегория: {{ subcat_data.subcategory.name }}</span>
                 </div>
                 <div>
-                  <a href="{{ url_for('admin.edit_category', cat_slug=subcat_data.subcategory.slug, is_subcategory=True) }}" class="entity-action-btn">Редактировать подкатегорию</a>
+                  <a href="{{ url_for('admin.edit_category', slug=subcat_data.subcategory.slug, is_subcategory=True) }}" class="entity-action-btn">Редактировать подкатегорию</a>
                     <form method="POST" action="{{ url_for('admin.delete_category',
-                    cat_id=subcat_data.subcategory.id, is_subcategory=True) }}" style="display:inline">
+                    slug=subcat_data.subcategory.slug, is_subcategory=True) }}" style="display:inline">
                         <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                         <button type="submit" class="entity-action-btn delete"
                                 onclick="return confirm('Удалить подкатегорию?')">Удалить подкатегорию
                         </button>
                     </form>
-                  <a href="{{ url_for('admin.create_product', cat_id=item.category.id, subcat_id=subcat_data.subcategory.id) }}" class="entity-action-btn add">Добавить товар</a>
+                  <a href="{{ url_for('admin.create_product', cat_slug=item.category.slug, subcat_slug=subcat_data.subcategory.slug) }}" class="entity-action-btn add">Добавить товар</a>
                 </div>
               </div>
 
@@ -80,7 +80,7 @@
                       <td>{{ product.weight if product.weight else "Неизвестно"}}</td>
                       <td>
                         <a href="{{ url_for("admin.edit_product", product_slug=product.slug) }}" class="entity-action-btn">Изменить</a>
-                        <form method="POST" action="{{ url_for("admin.delete_product", product_id=product.id) }}" style="display:inline">
+                        <form method="POST" action="{{ url_for("admin.delete_product", product_slug=product.slug) }}" style="display:inline">
                             <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                             <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить подкатегорию?')">Удалить</button>
                         </form>

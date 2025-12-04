@@ -154,6 +154,12 @@ class UserService:
         flash("Данные сохранены", category="success")
         return True
 
+    def get_users(self):
+        """Функция возвращает всех пользователей"""
+        users = self.db.session.execute(
+            select(User).order_by(User.id)
+        )
+
 
 class ProductService:
     def __init__(self, db):
@@ -184,7 +190,7 @@ class ProductService:
         ).scalar()
         return category
 
-    def get_category_slug_by_product_slug(self, *, product_slug):
+    def get_category_by_product_slug(self, *, product_slug):
         """Возвращает категорию по slug продукта"""
         category = self.db.session.execute(
             select(Category)
@@ -219,6 +225,7 @@ class ProductService:
             category = object(
                 category_id=cat_id,
                 name=form.name.data,
+                slug=slugify(form.name.data),
                 picture=form.picture.data.filename,
             )
         self.db.session.add(category)
@@ -240,24 +247,22 @@ class ProductService:
         self.db.session.commit()
         flash(message=message, category="success")
 
-    def delete_category(self, *, cat_id, object):
+    def delete_category(self, *, cat_slug, object):
         """Функция удаляет выбранную категорию"""
         category = self.db.session.execute(
-            select(object).where(object.id == cat_id)
+            select(object).where(object.slug == cat_slug)
         ).scalar_one()
 
         if category.products:
             flash("Нельзя удалить категорию - в ней есть товары!")
             return False
 
-        file_name = category.picture
-
         self.db.session.delete(category)
         self.db.session.commit()
         message = "Категория удалена!" if object is Category else "Подкатегория удалена!"
         flash(message=message, category="success")
 
-        return file_name
+        return True
 
 
     """Подкатегории"""
@@ -271,10 +276,10 @@ class ProductService:
         ).scalars().all()
         return subcategories
 
-    def get_subcategory_by_slug(self, *, slug):
+    def get_subcategory_by_slug(self, *, subcat_slug):
         """Возвращает подкатегорию по ее slug"""
         subcategory = self.db.session.execute(
-            select(SubCategory).where(SubCategory.slug == slug)
+            select(SubCategory).where(SubCategory.slug == subcat_slug)
         ).scalar()
         return subcategory
 
@@ -353,10 +358,10 @@ class ProductService:
         self.db.session.commit()
         flash(message="Товар обновлен", category="success")
 
-    def delete_product(self, *, product_id):
+    def delete_product(self, *, product_slug):
         """Функция удаляет выбранный товар"""
         product = self.db.session.execute(
-            select(Product).where(Product.id == product_id)
+            select(Product).where(Product.slug == product_slug)
         ).scalar_one()
 
         file_name = product.picture

@@ -11,7 +11,7 @@
           <div class="cart-card">
             <div class="cart-img-box">
               <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
-                  <img src="{{ url_for('catalog.static', filename='images/' + item.products.picture) }}"
+                  <img src="{{ url_for('catalog.static', filename='images/products/' ~ item.products.category.slug ~ '/' ~ item.products.subcategory.slug ~ '/' ~ item.products.picture) }}"
                        alt="{{ item.products.name }}" class="cart-img"></a>
             </div>
             <div class="cart-info">

@@ -27,7 +27,7 @@
           <div class="category-card">
             {% if not cat_slug_if_subcats %}
               {% if category.cat.picture %}
-                <img src="{{ url_for('catalog.static', filename='images/' + category.cat.picture) }}" alt="{{ category.cat.name }}" class="category-image">
+                <img src="{{ url_for('catalog.static', filename='images/categories/' + category.cat.picture) }}" alt="{{ category.cat.name }}" class="category-image">
               {% endif %}
 
               <div class="category-title">{{ category.cat.name }}</div>
@@ -49,7 +49,7 @@
                     <a href="{{ url_for(
                     'catalog.products',
                     subcategory_slug=category.slug) }}" class="no-underline">
-                        <img src="{{ url_for('catalog.static', filename='images/' + category.picture) }}" alt="{{ category.name }}" class="subcategory-image">
+                        <img src="{{ url_for('catalog.static', filename='images/subcategories/' ~ category.category.slug ~ '/' ~ category.picture) }}" alt="{{ category.name }}" class="subcategory-image">
                 {% endif %}
                 <div class="subcategory-title">{{ category.name }}</div>
                     </a>

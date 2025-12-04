@@ -6,7 +6,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 
 from extensions import db
-from services import DATABASE_URL_FOR_FLASK
+from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len
 from blueprints import header, catalog, admin
 from UserLogin import UserLogin
 from sheduler import setup_scheduler
@@ -49,6 +49,9 @@ def create_app():
     app.register_blueprint(header, url_prefix='/')
     app.register_blueprint(catalog, url_prefix='/catalog')
     app.register_blueprint(admin, url_prefix='/admin')
+
+    # Подключаем контекстный процессор (определяет переменную в каждом html шаблоне)
+    app.context_processor(create_inject_cart_len(db))
 
     # Инициализируем расширения
     db.init_app(app)

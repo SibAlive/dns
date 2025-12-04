@@ -4,7 +4,7 @@
 <link type="text/css" href="{{ url_for('catalog.static', filename='css/styles.css') }}" rel="stylesheet" />
 
 <div class="catalog-container">
-    {#    breadcrumbds#}
+<!-- breadcrumbds -->
     <nav arial-label="breadcrumb">
         <ol class="breadcrumb">
             {% for item in breadcrumbs %}
@@ -34,7 +34,7 @@
                     'catalog.product',
                     product_slug=product.slug) }}" class="no-underline">
               <div class="products-header">
-                <img src="{{ url_for('catalog.static', filename='images/' + product.picture) }}" alt="{{ product.name }}" class="products-img">
+                <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="products-img">
               </div>
               <div class="products-title">
                 {{ product.name }}
@@ -131,8 +131,8 @@
 
                         // ДОБАВЛЯЕМ НОВЫЕ ТОВАРЫ
                         data.products.forEach(product => {
-                            const productUrl = `/category/${product.category_id}/subcategory/${product.subcategory_id}/product/${product.id}`;
-                            const imageUrl = window.imagePathTemplate + product.picture;
+                            const productUrl = `/catalog/product/${product.slug}`;
+                            const imageUrl = product.image_url;
                             const isFavClass = window.initialFavoriteIds.includes(product.id) ? "is-fav" : "";
 
                             const card = `
