@@ -34,7 +34,8 @@
                     'catalog.product',
                     product_slug=product.slug) }}" class="no-underline">
               <div class="products-header">
-                <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="products-img">
+                  {% set main_img = product.images | selectattr('is_main') | first %}
+                  <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}" alt="{{ product.name }}" class="products-main-img">
               </div>
               <div class="products-title">
                 {{ product.name }}
@@ -47,7 +48,6 @@
                                 data-product-id="{{ product.id }}">
                             &#10084;
                         </button>
-{#                <button class="products-cart"></button>#}
                   <form method="post" action="{{ url_for('catalog.add_to_cart', product_id=product.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                     <button type="submit" class="products-cart"></button>
@@ -139,7 +139,7 @@
                                 <div class="products-card">
                                     <a href="${productUrl}" class="no-underline">
                                         <div class="products-header">
-                                            <img src="${imageUrl}" alt="${product.name}" class="products-img">
+                                            <img src="${imageUrl}" alt="${product.name}" class="products-main-img">
                                         </div>
                                         <div class="products-title">${product.name}</div>
                                     </a>

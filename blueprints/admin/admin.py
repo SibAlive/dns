@@ -1,4 +1,7 @@
 import os
+import logging
+import shutil
+
 from flask import (Blueprint, request, redirect, url_for, flash,
                    render_template, session, current_app)
 from werkzeug.utils import secure_filename
@@ -7,6 +10,9 @@ from extensions import db
 from models import Category, SubCategory
 from services import ProductService, create_path_for_file
 from forms import CategoryForm, CategoryEditForm, ProductForm, ProductEditForm
+
+
+logger = logging.getLogger(__name__)
 
 
 admin = Blueprint(
@@ -253,29 +259,30 @@ def create_product(cat_slug, subcat_slug):
     product_service = ProductService(db)
 
     if form.validate_on_submit():
-        # Проверяем уникальность наименования товара
         cat_id = product_service.get_category_by_slug(cat_slug=cat_slug).id
         subcat_id = product_service.get_subcategory_by_slug(subcat_slug=subcat_slug).id
 
-        ok = product_service.create_product(form=form, cat_id=cat_id, subcat_id=subcat_id)
-        if not ok:
-            flash("Товар с указанным именем уже существует!", category="danger")
-            return render_template(
-                'admin/product_form.html',
-                form=form,
+        # Проверяем уникальность наименования товара
+        try:
+            product = product_service.create_product(form=form, cat_id=cat_id, subcat_id=subcat_id)
+            if not product:
+                flash("Товар с указанным именем уже существует!", category="danger")
+                return render_template(
+                    'admin/product_form.html',
+                    form=form,
+                )
+
+            # Сохраняем фото на диск
+            files = [form.main_image.data] + list(request.files.getlist('extra_images'))
+            create_path_for_file(current_app,
+                                 subfolders=['products', cat_slug, subcat_slug, product.slug],
+                                 file_name=files,
+                                 product_id=product.id,
+                                 db=db
             )
-
-        # Сохраняем фото на диск
-        file = form.picture.data
-        file_name = secure_filename(file.filename)
-        file_path = create_path_for_file(current_app,
-                                         subfolders=['products', cat_slug, subcat_slug],
-                                         file_name=file_name
-                                         )
-        file.save(file_path)
-        flash('Фото успешно загружено!', category="success")
-
-        flash("Товар создан!", category="success")
+            flash("Товар создан!", category="success")
+        except Exception:
+            flash("Непредвиденная ошибка")
         return redirect(url_for('admin.products'))
 
     return render_template(
@@ -293,19 +300,47 @@ def edit_product(product_slug):
     form = ProductEditForm(obj=product)
 
     if form.validate_on_submit():
+        # Сохраняем изменения в данных товара
         product_service.edit_product(form=form, product=product)
-        # Если загружено новое фото, сохраняем его
-        if form.picture.data:
-            file = form.picture.data
-            file_name = secure_filename(file.filename)
-            cat_slug = product.category.slug
-            subcat_slug = product.subcategory.slug
-            file_path = create_path_for_file(current_app,
-                                             subfolders=['products', cat_slug, subcat_slug],
-                                             file_name=file_name
-                                             )
-            file.save(file_path)
-            flash('Фото успешно обновлено!', category="success")
+
+        # Формируем путь до папки с изображениями
+        catalog_bp = current_app.blueprints.get('catalog')
+        product_folder = os.path.join(
+            catalog_bp.root_path,
+            'static', 'images', 'products',
+            product.category.slug,
+            product.subcategory.slug,
+            product.slug
+        )
+
+        # Сохраняем новые изображения (если есть)
+        main_image = form.main_image.data
+        extra_images = request.files.getlist('extra_images')
+
+        all_files = []
+        if main_image and hasattr(main_image, 'filename') and main_image.filename:
+            all_files.append(main_image)
+        if extra_images:
+            for img in extra_images:
+                all_files.append(img)
+
+        if all_files:
+            # Удаляем папку со старыми изображениями (только если загружены новые)
+            if os.path.exists(product_folder):
+                shutil.rmtree(product_folder)
+            # Удаляем пути до фото в БД:
+            product_service.delete_files_path(product_id=product.id)
+            # Сохраняем новые фото
+            create_path_for_file(current_app,
+                                 subfolders=['products',
+                                             product.category.slug,
+                                             product.subcategory.slug,
+                                             product.slug
+                                             ],
+                                 file_name=all_files,
+                                 product_id=product.id,
+                                 db=db
+                                 )
 
         return redirect(url_for('admin.products'))
 
@@ -319,22 +354,36 @@ def edit_product(product_slug):
 @admin.route('/delete_product/<product_slug>', methods=['POST'])
 def delete_product(product_slug):
     product_service = ProductService(db)
-
-    # Удаляем запись в БД и получаем название фото
-    file_name = product_service.delete_product(product_slug=product_slug)
-
-    # Удаляем фото
     product = product_service.get_product_by_slug(product_slug=product_slug)
-    cat_slug = product.category.slug
-    subcat_slug = product.subcategory.slug
-    file_path = create_path_for_file(current_app,
-                                     subfolders=['products', cat_slug, subcat_slug],
-                                     file_name=file_name
-                                     )
+
+    # Удаляем папку с изображениями
     try:
-        os.remove(file_path)
-    except FileNotFoundError:
-        flash("Не удается найти указанный файл", category="error")
+        catalog_bp = current_app.blueprints.get('catalog')
+        if catalog_bp is None:
+            logger.error("Blueprint 'catalog' не найден!")
+            flash("Blueprint 'catalog' не найден!", category="danger")
+            return redirect(url_for('admin.products'))
+
+        product_folder = os.path.join(
+            catalog_bp.root_path,
+            'static', 'images', 'products',
+            product.category.slug,
+            product.subcategory.slug,
+            product.slug
+        )
+
+        if os.path.exists(product_folder):
+            shutil.rmtree(product_folder)
+            flash("Изображения товара удалены", category="success")
+        else:
+            flash("Папка с изображениями не найдена", category="warning")
+
+    except Exception as e:
+        logger.error(f"Ошибка при удалении папки товара: {e}")
+        flash(f"Не удалось удалить файлы товара", category="error")
+
+    # Удаляем продукт из БД
+    product_service.delete_product(product_slug=product_slug)
 
     return redirect(url_for('admin.products'))
 

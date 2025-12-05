@@ -78,7 +78,10 @@
                         'catalog.product',
                         product_slug=product.slug) }}" class="no-underline">
                   <div class="products-header">
-                    <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="products-img">
+                      {% set main_img = product.images | selectattr('is_main') | first %}
+                      <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                      alt="{{ product.name }}"
+                      class="products-main-img">
                   </div>
                   <div class="products-title">
                     {{ product.name }}

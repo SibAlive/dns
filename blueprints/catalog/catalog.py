@@ -150,8 +150,9 @@ def product_sort(subcategory_slug):
     result = []
     for p in list_products:
         # Строим полный URL к изображению
-        image_filename = f"images/products/{cat_slug}/{subcategory_slug}/{p.picture}"
+        image_filename = f"images/{product_service.get_main_image(product_id=p.id).image_path}"
         image_url = url_for('catalog.static', filename=image_filename)
+        print(image_url)
         result.append({
             'id': p.id,
             'category_id': p.category_id,
@@ -159,7 +160,6 @@ def product_sort(subcategory_slug):
             'name': p.name,
             'slug': p.slug,
             'description': p.description,
-            'picture': p.picture,
             'price': float(p.price),
             'stock_quantity': p.stock_quantity,
             'created_at': p.created_at,

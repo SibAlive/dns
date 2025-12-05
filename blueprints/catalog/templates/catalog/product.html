@@ -25,15 +25,19 @@
   <div class="product-wrapper">
     <!-- Галерея слева -->
     <aside class="product-gallery">
-{#      <div class="gallery-thumbs">#}
-{#        <img src="thumb1.jpg" class="gallery-thumb active">#}
-{#        <img src="thumb2.jpg" class="gallery-thumb">#}
-{#        <img src="thumb3.jpg" class="gallery-thumb">#}
-{#        <img src="thumb4.jpg" class="gallery-thumb">#}
-{#        <img src="thumb5.jpg" class="gallery-thumb">#}
-{#      </div>#}
+      <div class="gallery-thumbs">
+          {% for img in product.images %}
+            <img src="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}"
+                class="gallery-thumb {% if img.is_main %}active{% endif %}"
+                data-large="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}">
+          {% endfor %}
+      </div>
       <div class="gallery-main">
-        <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.category.slug ~ '/' ~ product.subcategory.slug ~ '/' ~ product.picture) }}" alt="{{ product.name }}" class="gallery-main-img">
+        {% set main_img = product.images | selectattr('is_main') | first %}
+        <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+             alt="{{ product.name }}"
+             class="gallery-main-img"
+             id="mainProductImg">
       </div>
     </aside>
 
@@ -77,5 +81,23 @@
   </div>
 </div>
 </body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.gallery-thumb').forEach(function(thumb) {
+    thumb.addEventListener('click', function() {
+      // Сменить главное изображение
+      const mainImg = document.getElementById('mainProductImg');
+      mainImg.src = this.dataset.large;
+
+      // Выделить активную миниатюру
+      document.querySelectorAll('.gallery-thumb').forEach(function(img) {
+        img.classList.remove('active');
+      });
+      this.classList.add('active');
+    });
+  });
+});
+</script>
 
 {% endblock %}

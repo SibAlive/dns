@@ -7,7 +7,7 @@ from slugify import slugify
 import logging
 
 from models import (User, Category, SubCategory, Product, CartItem, Favorite,
-                    Order, OrderItem)
+                    Order, OrderItem, ProductImage)
 
 
 logger = logging.getLogger(__name__)
@@ -315,7 +315,7 @@ class ProductService:
         random_products = self.db.session.execute(
             select(Product)
             .order_by(func.random())
-            .limit(16)
+            .limit(8)
         ).scalars().all()
         return random_products
 
@@ -332,7 +332,6 @@ class ProductService:
             name=form.name.data,
             slug=slugify(form.name.data),
             description=form.description.data,
-            picture=form.picture.data.filename,
             price=form.price.data,
             stock_quantity=form.stock_quantity.data,
             sku=form.sku.data,
@@ -340,7 +339,7 @@ class ProductService:
         )
         self.db.session.add(product)
         self.db.session.commit()
-        return True
+        return product
 
     def edit_product(self, *, form, product):
         """Функция редактирует существующий товар"""
@@ -352,9 +351,6 @@ class ProductService:
         product.sku = form.sku.data
         product.weight = form.weight.data
 
-        # Обновляем имя файла только если загружен новый файл
-        if form.picture.data:
-            product.picture = form.picture.data.filename
         self.db.session.commit()
         flash(message="Товар обновлен", category="success")
 
@@ -364,13 +360,10 @@ class ProductService:
             select(Product).where(Product.slug == product_slug)
         ).scalar_one()
 
-        file_name = product.picture
-
         self.db.session.delete(product)
         self.db.session.commit()
 
         flash(message="Товар удален!", category="success")
-        return file_name
 
     def get_product_balance(self, *, product_id):
         """Функция возвращает количество оставшегося товара"""
@@ -378,6 +371,24 @@ class ProductService:
             select(Product).where(Product.id == product_id)).scalar()
         stock_quantity = product.stock_quantity
         return stock_quantity
+
+    def delete_files_path(self, *, product_id):
+        """Удаляем пути к фото товара (необходимо при изменении товара)"""
+        files_path = self.db.session.execute(
+            select(ProductImage).where(ProductImage.product_id == product_id)
+        ).scalars().all()
+
+        for file_path in files_path:
+            self.db.session.delete(file_path)
+        self.db.session.commit()
+
+    def get_main_image(self, *, product_id):
+        """Возвращает путь к главному фото товара"""
+        files_path = self.db.session.execute(
+            select(ProductImage)
+            .where(ProductImage.product_id == product_id, ProductImage.is_main == True)
+        ).scalars().first()
+        return files_path
 
 
 class CartService:

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, FileRequired
+from flask_wtf.file import FileAllowed, FileRequired, MultipleFileField
 from wtforms import (StringField, SubmitField, BooleanField, PasswordField, FileField,
                      DecimalField, IntegerField, TelField, RadioField, EmailField)
 from wtforms.fields.simple import TextAreaField, HiddenField
@@ -86,8 +86,11 @@ class ProductForm(FlaskForm):
         DataRequired(),
         Length(min=10, max=1000)
     ])
-    picture = FileField("Загрузите фото", validators=[
+    main_image = FileField("Главное фото", validators=[
         FileRequired(message='Выберите файл!'),
+        FileAllowed(['png', 'jpg', 'jpeg'], 'Только изображения!')
+    ])
+    extra_images = MultipleFileField("Дополнительные фото", validators=[
         FileAllowed(['png', 'jpg', 'jpeg'], 'Только изображения!')
     ])
     price = DecimalField(
@@ -125,7 +128,10 @@ class ProductEditForm(FlaskForm):
         DataRequired(),
         Length(min=10, max=1000)
     ])
-    picture = FileField("Загрузите фото", validators=[
+    main_image = FileField("Главное фото", validators=[
+        FileAllowed(['png', 'jpg', 'jpeg'], 'Только изображения!')
+    ])
+    extra_images = MultipleFileField("Дополнительные фото", validators=[
         FileAllowed(['png', 'jpg', 'jpeg'], 'Только изображения!')
     ])
     price = DecimalField(

@@ -2,14 +2,17 @@ import os
 import logging
 from flask import flash, session
 from flask_login import current_user
+from werkzeug.utils import secure_filename
+from sqlalchemy import select
 
 from .db_functions import CartService, ProductService
+from models import ProductImage
 
 
 logger = logging.getLogger(__name__)
 
 
-def create_path_for_file(current_app, *, subfolders, file_name):
+def create_path_for_file(current_app, *, subfolders, file_name, product_id=None, db=None):
     # Получаем объект catalog blueprint
     catalog_bp = current_app.blueprints.get('catalog')
     if catalog_bp is None:
@@ -21,9 +24,40 @@ def create_path_for_file(current_app, *, subfolders, file_name):
 
     upload_folder = os.path.join(catalog_bp.root_path, 'static', 'images', *subfolders)
     os.makedirs(upload_folder, exist_ok=True)
+
     # Путь до файла
-    filepath = os.path.join(upload_folder, file_name)
-    return filepath
+    if isinstance(file_name, list):
+        """Проверяем, является ли имя файла списком (для продуктов)"""
+        try:
+            files_path = []
+            for i, file in enumerate(file_name):
+                if not file or not hasattr(file, 'filename') or not file.filename.strip():
+                    continue
+                filename = secure_filename(file.filename)
+                # Относительный путь для БД
+                rel_filepath = os.path.join(*subfolders, filename).replace('\\', '/')
+                # Абсолютный путь для сохранения на диск
+                abs_filepath = os.path.join(upload_folder, filename)
+                file.save(abs_filepath)
+                files_path.append(abs_filepath)
+
+                # Сохраняем путь до файла в БД
+                img = ProductImage(
+                    product_id=product_id,
+                    image_path=rel_filepath,
+                    sort_order=i,
+                    is_main=(i == 0)
+                )
+                db.session.add(img)
+            db.session.commit()
+            flash('Фото успешно загружено!', category="success")
+            return files_path
+        except Exception as e:
+            logger.error("Ошибка добавления пути фото товара: " + str(e))
+            flash("Ошибка загрузки фото", category="error")
+    else:
+        filepath = os.path.join(upload_folder, file_name)
+        return filepath
 
 
 def add_product_to_cart(db, *, user_id, product_id):

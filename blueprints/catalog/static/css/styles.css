@@ -197,20 +197,26 @@ body {
   color: #303030;
 }
 
+/* Дополнительно: если изображение "вылезает" из контейнера — ограничиваем его */
 .products-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 210px; /* чуть больше высоты img */
+  min-height: 200px; /* ← фиксируем высоту контейнера */
+  overflow: hidden;  /* ← отсекаем всё лишнее */
 }
 
-.products-img {
-  width: 200px;
-  height: 200px;
-  object-fit: contain;
+.products-main-img {
+  max-width: 100%;
+  max-height: 200px;        /* ← не выше 200px */
+  height: auto;             /* ← пропорциональная высота */
+  width: auto;              /* ← пропорциональная ширина */
   display: block;
+  object-fit: contain;      /* ← сохраняет пропорции, не обрезает */
+  margin: 0 auto;           /* центрируем по горизонтали */
   border-radius: 8px;
   background: #fafcff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .products-title {
@@ -351,9 +357,16 @@ body {
   justify-content: center;
 }
 .gallery-main-img {
-  width: 92%;
-  height: 92%;
-  object-fit: contain;
+  max-width: 100%;
+  max-height: 400px;        /* ← не выше 200px */
+  height: auto;             /* ← пропорциональная высота */
+  width: auto;              /* ← пропорциональная ширина */
+  display: block;
+  object-fit: contain;      /* ← сохраняет пропорции, не обрезает */
+  margin: 0 auto;           /* центрируем по горизонтали */
+  border-radius: 8px;
+  background: #fafcff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 .special-mark {
   position: absolute; top: 20px; left: 18px;
@@ -854,6 +867,13 @@ body {
     margin: 0;
     background: #f8f8f8;
     color: #222;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0066cc;
+  text-decoration: none;
 }
 
 .dns-container {

@@ -8,7 +8,7 @@ from extensions import db
 from forms import RegisterForm, LoginForm, EditProfileForm
 from services import (UserService, ProductService, transfer_guest_cart_to_user,
                       transfer_guest_favorite_to_user, CartService)
-from UserLogin import UserLogin
+from services.UserLogin import UserLogin
 
 
 header = Blueprint(

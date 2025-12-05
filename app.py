@@ -8,7 +8,7 @@ from flask_wtf.csrf import generate_csrf
 from extensions import db
 from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len
 from blueprints import header, catalog, admin
-from UserLogin import UserLogin
+from services.UserLogin import UserLogin
 from sheduler import setup_scheduler
 
 

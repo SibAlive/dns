@@ -21,9 +21,14 @@
       </div>
 
       <div class="form-group">
-        {{ form.picture.label(class='form-label') }}
-        {{ form.picture(class='form-file') }}
-        <small class="form-hint">Поддерживаются форматы: JPG, PNG (макс. 5MB)</small>
+        {{ form.main_image.label(class='form-label') }}
+        {{ form.main_image(class='form-file') }}
+        <small class="form-hint">Поддерживаются форматы: JPG, PNG</small>
+      </div>
+
+      <div class="form-group">
+        {{ form.extra_images.label(class='form-label') }}
+        <input type="file" name="extra_images" multiple accept="images/*" class="form-file">
       </div>
 
       <div class="form-group">

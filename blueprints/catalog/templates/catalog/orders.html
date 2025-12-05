@@ -18,8 +18,10 @@
 
         <div class="order-preview">
             {% for product in order.order_item %}
-                <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.products.category.slug ~ '/' ~ product.products.subcategory.slug ~ '/' ~ product.products.picture) }}"
-                     alt="{{ product.name }}" class="order-preview-item">
+                {% set main_img = product.products.images | selectattr('is_main') | first %}
+                  <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                       alt="{{ product.name }}"
+                       class="order-preview-item">
             {% endfor %}
 
             <div class="order-price-action">
@@ -52,8 +54,10 @@
         <!-- Развёрнутый список товаров -->
         {% for product in order.order_item %}
             <div class="order-item">
-              <img src="{{ url_for('catalog.static', filename='images/products/' ~ product.products.category.slug ~ '/' ~ product.products.subcategory.slug ~ '/' ~ product.products.picture) }}"
-                     alt="{{ product.name }}" class="order-preview-item">
+              {% set main_img = product.products.images | selectattr('is_main') | first %}
+              <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                   alt="{{ product.name }}"
+                   class="order-preview-item">
               <div class="order-item-data">
                 <div class="order-item-title">{{ product.name }}</div>
                 {% if product.sku %}

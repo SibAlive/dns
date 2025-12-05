@@ -54,7 +54,6 @@ class Product(db.Model):
     name = db.Column(db.Text, nullable=False)
     slug = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
-    picture = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
     stock_quantity = db.Column(db.Integer, default=0) # Остатки на складе
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now()) # Дата создания
@@ -65,9 +64,25 @@ class Product(db.Model):
     cart_item = relationship("CartItem", back_populates="products")
     favorite = relationship("Favorite", back_populates="products")
     order_item = relationship("OrderItem", back_populates="products", cascade="all, delete-orphan")
+    images = relationship("ProductImage",
+                          back_populates="product",
+                          order_by="ProductImage.sort_order",
+                          cascade="all, delete-orphan")
 
     category = relationship("Category", back_populates="products")
     subcategory = relationship("SubCategory", back_populates="products")
+
+
+class ProductImage(db.Model):
+    __tablename__ = "product_images"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True)
+    image_path = db.Column(db.String(255), nullable=False)
+    sort_order = db.Column(db.Integer, default=False) # Порядок отображения
+    is_main = db.Column(db.Boolean, default=False) # Главное фото
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+
+    product = relationship("Product", back_populates="images")
 
 
 class CartItem(db.Model):
