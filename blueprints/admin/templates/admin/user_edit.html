@@ -1,0 +1,41 @@
+{% extends 'header/base.html' %}
+
+{% block content %}
+{{ super() }}
+
+<div class="profile-container">
+    <div class="profile-row">
+        <!-- Режим редактирования -->
+        <form method="post" class="profile-edit-form">
+            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+
+            {{ form.surname.label }}
+            {{ form.surname(class="form-control", id="surname") }}
+
+            {{ form.name.label }}
+            {{ form.name(class="form-control", id="name") }}
+
+            {{ form.email.label }}
+            {{ form.email(class="form-control", id="email") }}
+
+            {{ form.phone.label }}
+            {{ form.phone(class="form-control", id="phone") }}
+            {% for err in form.phone.errors %}<span class="error">{{ err }}</span>{% endfor %}
+
+            <div class="profile-actions">
+                <button type="submit">Сохранить</button>
+                <a href="{{ url_for('admin.users') }}">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Скрипт для обновления текста "Файл не выбран" -->
+<script>
+function updateFileName(input) {
+    const fileName = input.files[0] ? input.files[0].name : "Файл не выбран";
+    document.querySelector('.file-name').textContent = fileName;
+}
+</script>
+
+{% endblock %}

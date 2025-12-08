@@ -26,18 +26,32 @@
     <!-- Галерея слева -->
     <aside class="product-gallery">
       <div class="gallery-thumbs">
-          {% for img in product.images %}
-            <img src="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}"
-                class="gallery-thumb {% if img.is_main %}active{% endif %}"
-                data-large="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}">
-          {% endfor %}
+          {% if product.images %}
+              {% for img in product.images %}
+                <img src="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}"
+                    class="gallery-thumb {% if img.is_main %}active{% endif %}"
+                    data-large="{{ url_for('catalog.static', filename='images/' ~ img.image_path) }}">
+              {% endfor %}
+          {% else %}
+                <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                    class="gallery-thumb active"
+                    data-large="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}">
+          {% endif %}
+
       </div>
       <div class="gallery-main">
         {% set main_img = product.images | selectattr('is_main') | first %}
-        <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
-             alt="{{ product.name }}"
-             class="gallery-main-img"
-             id="mainProductImg">
+          {% if main_img %}
+            <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                 alt="{{ product.name }}"
+                 class="gallery-main-img"
+                 id="mainProductImg">
+          {% else %}
+            <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                 alt="Изображение отсутствует"
+                 class="gallery-main-img"
+                 id="mainProductImg">
+          {% endif %}
       </div>
     </aside>
 

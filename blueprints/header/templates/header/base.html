@@ -23,10 +23,10 @@
       <div class="header-left">
         <a href="/" class="logo">DNS</a>
         <nav class="nav-links">
-          <a href="/promotions" class="nav-link">Акции</a>
-          <a href="/stores" class="nav-link">Магазины</a>
-          <a href="/delivery" class="nav-link">Доставка</a>
-          <a href="/vacancies" class="nav-link">Вакансии</a>
+          <form action="{{ url_for('header.search') }}" method="get">
+              <input type="text" name="q" placeholder="Поиск...">
+              <button type="submit">Найти</button>
+          </form>
         </nav>
       </div>
 
@@ -79,9 +79,17 @@
                         product_slug=product.slug) }}" class="no-underline">
                   <div class="products-header">
                       {% set main_img = product.images | selectattr('is_main') | first %}
-                      <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
-                      alt="{{ product.name }}"
-                      class="products-main-img">
+                          {% if main_img %}
+                            <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                                 alt="{{ product.name }}"
+                                 class="gallery-main-img"
+                                 id="mainProductImg">
+                          {% else %}
+                            <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                                 alt="Изображение отсутствует"
+                                 class="gallery-main-img"
+                                 id="mainProductImg">
+                          {% endif %}
                   </div>
                   <div class="products-title">
                     {{ product.name }}

@@ -19,13 +19,21 @@
         <div class="order-preview">
             {% for product in order.order_item %}
                 {% set main_img = product.products.images | selectattr('is_main') | first %}
-                  <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
-                       alt="{{ product.name }}"
-                       class="order-preview-item">
+                  {% if main_img %}
+                    <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                         alt="{{ product.name }}"
+                         class="order-preview-item"
+                         id="mainProductImg">
+                  {% else %}
+                    <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                         alt="Изображение отсутствует"
+                         class="order-preview-item"
+                         id="mainProductImg">
+                  {% endif %}
             {% endfor %}
 
             <div class="order-price-action">
-                <span class="order-total">{{ '{:,.0f}'.format(order.total_amount).replace(',', ' ') }} ₽</span>
+                <span class="order-total">{{ order.total_amount | money }} ₽</span>
 
                 {% if order.status == "Забронирован" %}
                     <div class="order-actions-row">
@@ -55,9 +63,17 @@
         {% for product in order.order_item %}
             <div class="order-item">
               {% set main_img = product.products.images | selectattr('is_main') | first %}
-              <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
-                   alt="{{ product.name }}"
-                   class="order-preview-item">
+                  {% if main_img %}
+                    <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                         alt="{{ product.products.name }}"
+                         class="products-main-img"
+                         id="mainProductImg">
+                  {% else %}
+                    <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                         alt="Изображение отсутствует"
+                         class="products-main-img"
+                         id="mainProductImg">
+                  {% endif %}
               <div class="order-item-data">
                 <div class="order-item-title">{{ product.name }}</div>
                 {% if product.sku %}
@@ -66,8 +82,8 @@
               </div>
 
               <div class="order-item-price">
-                <span>Цена: <b>{{ '{:,.0f}'.format(product.price * product.quantity).replace(',', ' ') }} ₽</b></span>
-                <div>{{ product.quantity }}&nbsp;шт. x {{ '{:,.0f}'.format(product.price).replace(',', ' ') }}&nbsp;₽</div>
+                <span>Цена: <b>{{ (product.price * product.quantity) | money}} ₽</b></span>
+                <div>{{ product.quantity }}&nbsp;шт. x {{ product.price | money }}&nbsp;₽</div>
               </div>
             </div>
         {% endfor %}

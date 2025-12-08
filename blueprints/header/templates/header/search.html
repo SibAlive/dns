@@ -1,0 +1,85 @@
+{% extends 'header/base.html' %}
+
+{% block content %}
+{{ super() }}
+
+<title>Поиск товаров</title>
+
+<div class="search=container">
+<!--        Шапка поиска-->
+    <div class="search-header">
+        <h1>🔍 Поиск товаров</h1>
+        <p>Введите название товара или артикул для поиска</p>
+    </div>
+
+<!--        Форма поиска-->
+    <div class="search-form-wrapper">
+        <form class="search-form" method="GET" action="/search">
+            <input
+                type="text"
+                class="search-input"
+                name="q"
+                placeholder="Например: Iphone 17, Телевизор Xiaomi..."
+                value="{{ query if query else '' }}">
+            <button type="submit" class="search-btn">
+                Найти товары
+            </button>
+        </form>
+    </div>
+
+<!--        Результаты поиска-->
+    <div class="search-results">
+        {% if query %}
+            <div class="result-header">
+                <div class="result-count">
+                    Найдено результатов по запросу
+                    <span class="results-query">{{ query }}</span>:
+                    {{ products | length }}
+                </div>
+                {% if products %}
+                    <a href="{{ url_for('catalog.catalog_index') }}" class="search-btn">Каталог</a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                    <div class="product-card">
+                        <a href="{{ url_for(
+                        'catalog.product',
+                        product_slug=product.slug) }}" class="no-underline">
+                            <div class="product-image">
+                                {% set main_img = product.images | selectattr('is_main') | first %}
+                                  {% if main_img %}
+                                    <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                                         alt="{{ product.name }}"
+                                         class="gallery-main-img"
+                                         id="mainProductImg">
+                                  {% else %}
+                                    <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                                         alt="Изображение отсутствует"
+                                         class="gallery-main-img"
+                                         id="mainProductImg">
+                                  {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <div class="product-title">{{ product.name }}</div>
+                                <div class="product-price">{{ product.price | money }} ₽</div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif query %}
+            <div class="no-results">
+                <div class="no-results-icon">🔍</div>
+                <h2>Ничего не найдено</h2>
+                <p>Попробуйте изменить запрос или посмотреть <a href="{{
+                url_for('catalog.catalog_index') }}">Весь каталог</a></p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

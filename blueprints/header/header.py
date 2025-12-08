@@ -25,6 +25,7 @@ def index():
     product_service = ProductService(db)
     cart_service = CartService(db)
     random_products = product_service.get_random_products()
+
     cart_len = len(cart_service.get_cart_items(user_id=current_user.get_id()))
     return render_template(
         "header/base.html",
@@ -90,6 +91,7 @@ def logout():
 def profile():
     user_service = UserService(db)
     edit_mode = False
+
     if request.method == "POST":
         if request.form.get('edit_mode'): # Переход в режим редактирования
             edit_mode = True
@@ -149,3 +151,16 @@ def upload():
             flash("Файл не выбран или неверный формат (правильный формат .png)", category="error")
 
     return redirect(url_for('header.profile'))
+
+@header.route('search')
+def search():
+    product_service = ProductService(db)
+    query = request.args.get('q', '').strip()
+    if not query:
+        return render_template('header/search.html', products=[])
+    products = product_service.product_search(string=query)
+    return render_template(
+        'header/search.html',
+        products=products,
+        query=query
+    )

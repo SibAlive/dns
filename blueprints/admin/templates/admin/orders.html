@@ -1,0 +1,100 @@
+{% extends 'admin/index.html' %}
+{% from "admin/macros/filter_form.html" import filter_form %}
+
+{% block info %}
+{{ super() }}
+<div class="orders-wrapper">
+    <h1>{{ title }}</h1>
+
+    <!--Форма фильтрации по дате-->
+    {{ filter_form('admin.orders', {'sort_by': sort_by, 'order': order}) }}
+
+    <table class="table table-striped admin-table">
+      <thead>
+        <tr>
+            <th>№ заказа</th>
+            <th><a href="{{ url_for('admin.orders',
+                                    sort_by='name',
+                                    order='asc' if sort_by != 'name' or order == 'desc' else 'desc',
+                                    date=request.args.get('date')) }}">
+                Пользователь⬆️⬇️
+            </a>
+            </th>
+            <th><a href="{{ url_for('admin.orders',
+                                    sort_by='time',
+                                    order='asc' if sort_by != 'time' or order == 'desc' else 'desc',
+                                    date=request.args.get('date')) }}">
+                Дата⬆️⬇️
+            </a>
+            </th>
+            <th><a href="{{ url_for('admin.orders',
+                                    sort_by='price',
+                                    order='asc' if sort_by != 'price' or order == 'desc' else 'desc',
+                                    date=request.args.get('date')) }}">
+                Стоимость заказа⬆️⬇️
+            </a>
+            </th>
+            <th>Метод оплаты</th>
+            <th>Способ получения</th>
+            <th>Адрес</th>
+            <th>Комментарий</th>
+            <th><a href="{{ url_for('admin.orders',
+                                    sort_by='status',
+                                    order='asc' if sort_by != 'status' or order == 'desc' else 'desc',
+                                    date=request.args.get('date')) }}">
+                Статус⬆️⬇️
+            </a>
+            </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if orders %}
+            {% for ord, user in orders %}
+                <tr data-order-id="{{ ord.id }}" data-order-url="{{ url_for('admin.order', order_id=0) }}">
+                    <td>{{ ord.id }}</td>
+                    <td>{{ user.surname }} {{ user.name }}</td>
+                    <td>{{ ord.updated_at | datetime('%d.%m.%Y %H:%M:%S') }}</td>
+                    <td>{{ ord.total_amount | money }} ₽</td>
+                    <td>{{ ord.payment_method }}</td>
+                    <td>{{ ord.shipping_method }}</td>
+                    <td>
+                        {% if ord.shipping_address %}
+                            {{ ord.shipping_address }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ord.comment %}
+                            {{ ord.comment }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status
+                        {{ 'success' if ord.status == 'Оплачен' else 'warning' if
+                        ord.status == 'Забронирован' else 'error' }}">
+                            {{ ord.status }}
+                        </span>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('tr[data-order-id]').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', function() {
+            const baseUrl = this.dataset.orderUrl.replace('0', this.dataset.orderId);
+            window.location.href = baseUrl;
+        });
+    });
+});
+</script>
+
+{% endblock %}

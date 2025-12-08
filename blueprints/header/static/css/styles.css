@@ -485,7 +485,7 @@ header {
     color: #184e9b;
 }
 
-/* Стили для ссылки "Выйти из профиля" */
+    /* Стили для ссылки "Выйти из профиля" */
 .profile-logout-link {
     display: inline-block;
     margin-top: 16px;
@@ -497,4 +497,269 @@ header {
 
 .profile-logout-link:hover {
     text-decoration: underline;
+}
+
+
+    /* Стили для страницы "search.html" */
+.search-container {
+    max-width: 1200px;
+    margin: 40px auto 0 auto; /* был 0 auto, сделаем отступ сверху */
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.search-header {
+    background: linear-gradient(135deg, #1E5BB7 0%, #2B6CB0 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.search-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.search-header p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.search-form-wrapper {
+    padding: 40px;
+    background: #f8f9ff;
+}
+
+.search-form {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 18px 24px;
+    font-size: 1.1rem;
+    border: 2px solid #e3e8f0;
+    border-radius: 50px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.search-input:focus {
+    border-color: #1E5BB7;
+    box-shadow: 0 0 0 4px rgba(30,91,183,0.1);
+    transform: translateY(-2px);
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.search-btn {
+    padding: 18px 32px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(255,107,53,0.4);
+}
+
+.search-results {
+    padding: 40px;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.result-count {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.results-query {
+    color: #1E5BB7;
+    font-weight: 600;
+}
+
+.products-grid {
+  display: flex;
+  gap: 24px; /* пространство между товарами */
+  flex-wrap: wrap; /* если нужно, чтобы товары переносились на следующую строку при недостатке ширины */
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid #ededed;
+  box-shadow: 0px 2px 10px rgba(40,40,48,0.06);
+  padding: 18px 13px 16px 13px;
+  max-width: 330px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #303030;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+}
+
+.products-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* ← фиксируем высоту контейнера */
+  overflow: hidden;  /* ← отсекаем всё лишнее */
+}
+
+.product-info {
+    padding: 22px;
+}
+
+.product-title {
+  font-size: 1.01rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 13px;
+  color: #212529;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1E5BB7;
+    margin-bottom: 12px;
+}
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1.5px solid #e5e7eb;
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.action-btn:hover {
+    border-color: #1E5BB7;
+    color: #1E5BB7;
+    background: #f0f7ff;
+}
+
+.action-fav {
+    position: relative;
+}
+
+.action-fav::after {
+    content: "♥";
+    margin-left: 4px;
+    color: #e86065;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 40px;
+    color: #64748b;
+}
+
+.no-results-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .search-header {
+        padding: 25px 20px;
+    }
+
+    .search-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .search-form-wrapper {
+        padding: 25px 20px;
+    }
+
+    .search-form {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .search-input {
+        padding: 20px;
+    }
+
+    .search-results {
+        padding: 25px 20px;
+    }
+
+    .result-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+}
+
+.result-header .search-btn {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.result-header .search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(255,107,53,0.4);
+}
+
+/* Добавляем стрелку слева через псевдоэлемент */
+.result-header .search-btn::before {
+    content: "←";
+    font-weight: bold;
 }

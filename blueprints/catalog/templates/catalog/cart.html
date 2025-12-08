@@ -12,7 +12,17 @@
             <div class="cart-img-box">
               <a href="{{ url_for('catalog.product', product_slug=item.products.slug) }}">
                   {% set main_img = item.products.images | selectattr('is_main') | first %}
-                  <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}" alt="{{ item.products.name }}" class="cart-img"></a>
+                      {% if main_img %}
+                        <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                             alt="{{ item.products.name }}"
+                             class="gallery-main-img"
+                             id="mainProductImg">
+                      {% else %}
+                        <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                             alt="Изображение отсутствует"
+                             class="gallery-main-img"
+                             id="mainProductImg">
+                      {% endif %}
             </div>
             <div class="cart-info">
               <div class="cart-prod-name">

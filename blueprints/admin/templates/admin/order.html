@@ -1,0 +1,99 @@
+{% extends 'admin/index.html' %}
+
+{% block info %}
+{{ super() }}
+<div class="order-details-wrapper">
+    <div class="order-header">
+        <h1>Заказ #{{ order.id }}</h1>
+        <div class="order-status-badge status
+            {{ 'success' if order.status == 'Оплачен' else 'warning' if order.status == 'Забронирован' else 'error' }}">
+            {{ order.status }}
+        </div>
+    </div>
+
+    <!-- Карточка с информацией о заказе -->
+    <div class="order-info-card card">
+        <h2>Детали заказа</h2>
+        <div class="order-info-grid">
+            <div class="info-row">
+                <span class="info-label">Дата создания:</span>
+                <span class="info-value">{{ order.updated_at | datetime('%d.%m.%Y %H:%M') }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Пользователь:</span>
+                <span class="info-value">{{ order.user.surname }} {{ order.user.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Метод оплаты:</span>
+                <span class="info-value">{{ order.payment_method }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Способ получения:</span>
+                <span class="info-value">{{ order.shipping_method }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Итого:</span>
+                <span class="info-value">{{ order.total_amount | money }} ₽</span>
+            </div>
+        </div>
+
+        {% if order.shipping_address %}
+        <div class="info-section">
+            <span class="info-label">Адрес доставки:</span>
+            <div class="info-address">{{ order.shipping_address }}</div>
+        </div>
+        {% endif %}
+
+        {% if order.comment %}
+        <div class="info-section">
+            <span class="info-label">Комментарий:</span>
+            <div class="info-comment">{{ order.comment }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Товары заказа -->
+    <div class="order-items-section">
+        <h2>Состав заказа</h2>
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Цена за ед.</th>
+                        <th>Количество</th>
+                        <th>Стоимость</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if order_items %}
+                        {% for order_item in order_items %}
+                            <tr>
+                                <td>{{ order_item.name }}</td>
+                                <td>{{ order_item.price | money }} ₽</td>
+                                <td>{{ order_item.quantity }}</td>
+                                <td>{{ order_item.total_price | money }} ₽</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td colspan="3"><strong>Итого:</strong></td>
+                            <td><strong>{{ order.total_amount | money }} ₽</strong></td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="no-items">Товары в заказе отсутствуют</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Кнопки действий -->
+    <div class="order-actions">
+        <a href="#" class="btn-back" onclick="window.history.back(); return false;" title="Назад">
+            ← Назад к списку
+        </a>
+    </div>
+</div>
+{% endblock %}

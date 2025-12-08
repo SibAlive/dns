@@ -6,7 +6,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 
 from extensions import db
-from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len
+from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len, UserService
 from blueprints import header, catalog, admin
 from services.UserLogin import UserLogin
 from sheduler import setup_scheduler
@@ -63,6 +63,7 @@ def create_app():
     login_manager.login_message_category = 'success'
     @login_manager.user_loader
     def load_user(user_id):
+        # Получаем пользователя из БД
         return UserLogin().fromDB(db, user_id)
 
     # Настройка планировщика задач

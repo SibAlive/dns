@@ -5,6 +5,7 @@ from psycopg2.errors import UniqueViolation
 from werkzeug.security import generate_password_hash
 from slugify import slugify
 import logging
+from datetime import datetime, timedelta
 
 from models import (User, Category, SubCategory, Product, CartItem, Favorite,
                     Order, OrderItem, ProductImage)
@@ -154,12 +155,6 @@ class UserService:
         flash("Данные сохранены", category="success")
         return True
 
-    def get_users(self):
-        """Функция возвращает всех пользователей"""
-        users = self.db.session.execute(
-            select(User).order_by(User.id)
-        )
-
 
 class ProductService:
     def __init__(self, db):
@@ -300,15 +295,28 @@ class ProductService:
         ).scalar()
         return product
 
-    def get_products_by_subcategory_slug(self, *, subcat_slug, order=Product.name):
-        """Возвращает список продуктов, входящих в выбранную подкатегорию (по slug)"""
-        products = self.db.session.execute(
+    def get_products_by_subcategory_slug(self, *,
+                                         subcat_slug,
+                                         order=None,
+                                         page=1,
+                                         per_page=8,
+                                         ):
+        """Возвращает пагинацию продуктов, входящих в выбранную подкатегорию (по slug)"""
+        stmt = (
             select(Product)
             .join(Product.subcategory)
             .where(SubCategory.slug == subcat_slug)
-            .order_by(order)
-        ).scalars().all()
-        return products
+        )
+        if order is not None:
+            stmt = stmt.order_by(order)
+        else:
+            stmt = stmt.order_by(Product.id)
+
+        return self.db.paginate(
+            stmt,
+            page=page,
+            per_page=per_page,
+        )
 
     def get_random_products(self):
         """Возвращает список 16 случайных товаров для главной страницы"""
@@ -368,7 +376,7 @@ class ProductService:
     def get_product_balance(self, *, product_id):
         """Функция возвращает количество оставшегося товара"""
         product = self.db.session.execute(
-            select(Product).where(Product.id == product_id)).scalar()
+            select(Product).where(Product.id == product_id)).scalars().one_or_none()
         stock_quantity = product.stock_quantity
         return stock_quantity
 
@@ -389,6 +397,13 @@ class ProductService:
             .where(ProductImage.product_id == product_id, ProductImage.is_main == True)
         ).scalars().first()
         return files_path
+
+    def product_search(self, *, string):
+        products = self.db.session.execute(
+            select(Product)
+            .filter(Product.name.ilike(f"%{string}%"))
+        ).scalars().all()
+        return products
 
 
 class CartService:
@@ -546,10 +561,12 @@ class CartService:
             self.db.session.rollback()
             logger.error("Ошибка оформления заказа " + str(e))
 
-    def get_orders(self, *, user_id):
+    def get_orders_by_user_id(self, *, user_id):
         """Возвращает список заказов пользователя"""
         orders = self.db.session.execute(
-            select(Order).where(Order.user_id == user_id)
+            select(Order)
+            .where(Order.user_id == user_id)
+            .order_by(Order.updated_at.desc())
         ).scalars().all()
         return orders
 
@@ -560,6 +577,7 @@ class CartService:
             select(Order).where(Order.id == order_id)
         ).scalar_one_or_none()
         order.status = "Оплачен"
+        order.paid_at = datetime.now()
 
         self.db.session.commit()
         flash("Заказ оплачен", category="success")
@@ -605,3 +623,99 @@ class CartService:
             select(OrderItem).where(OrderItem.order_id == order_id)
         ).scalars().all()
         return order_items
+
+
+class AdminService:
+    def __init__(self, db):
+        self.db = db
+
+    def get_orders_for_admin(self, *, sort_column, date_filter, user_id):
+        """Возвращает список заказов пользователя"""
+        stmt = (select(Order, User)
+                .outerjoin(User, User.id == Order.user_id)
+                .order_by(sort_column))
+        if user_id:
+            stmt = stmt.where(User.id == user_id)
+
+        # Фильтрация по дате
+        if date_filter:
+            try:
+                filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+                # Фильтруем записи, где заказ попадает в эту дату
+                stmt = stmt.where(self.db.func.date(Order.updated_at) == filter_date)
+            except ValueError:
+                # Игнорируем некорректную дату
+                pass
+
+        orders = self.db.session.execute(stmt).all()
+        return orders
+
+    def get_order_by_id(self, *, order_id):
+        """Возвращает заказ по его id"""
+        order_data = self.db.session.execute(
+            select(Order, User)
+            .outerjoin(User, User.id == Order.user_id)
+            .where(Order.id == order_id)
+        ).first()
+
+        if order_data:
+            order, user = order_data
+            order.user = user # прикрепляем пользователя
+            return order
+        return None
+
+    def delete_profile(self, *, user_id):
+        """Удаляет профиль пользователя"""
+        profile = self.db.session.execute(
+            select(User).where(User.id == user_id)
+        ).scalar_one_or_none()
+
+        if profile:
+            self.db.session.delete(profile)
+            flash("Профиль пользователя успешно удален!", category="success")
+            logger.warning(f"Пользователь {user_id} удален из БД")
+        self.db.session.commit()
+
+    def get_users_with_orders_count(self):
+        """Функция возвращает всех пользователей и количество заказов"""
+        users_with_orders = self.db.session.execute(
+            select(User, func.count(Order.id).label("order_count"))
+            .outerjoin(Order)
+            .group_by(User.id)
+            .order_by(User.time)
+        ).all()
+        return users_with_orders
+
+    def get_all_products(self):
+        """Функция возвращает все товары"""
+        products = self.db.session.execute(
+            select(Product).order_by(Product.id)
+        ).scalars().all()
+        return products
+
+    def get_completed_orders(self):
+        """Функция возвращает завершенные заказы"""
+        orders = self.db.session.execute(
+            select(Order).where(Order.status == 'Оплачен')
+        ).scalars().all()
+        return orders
+
+    def get_week_income(self):
+        """Функция возвращает доход за неделю"""
+        now = datetime.now()
+        delta = now - timedelta(days=7)
+
+        income = self.db.session.execute(
+            select(Order.total_amount)
+            .where(Order.paid_at >= delta)
+        ).scalars().all()
+        return sum(income)
+
+    def get_last_5_orders(self):
+        orders = self.db.session.execute(
+            select(Order, User)
+            .outerjoin(User, User.id == Order.user_id)
+            .order_by(Order.updated_at.desc())
+            .limit(5)
+        ).all()
+        return orders

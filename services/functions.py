@@ -1,11 +1,10 @@
 import os
 import logging
-from flask import flash, session
+from flask import flash, session, request
 from flask_login import current_user
 from werkzeug.utils import secure_filename
-from sqlalchemy import select
 
-from .db_functions import CartService, ProductService
+from .db_functions import User, CartService, ProductService, Order
 from models import ProductImage
 
 
@@ -130,3 +129,25 @@ def create_inject_cart_len(db):
             cart_len = len(cart_data)
         return dict(cart_len=cart_len)
     return inject_cart_len
+
+
+def build_admin_orders_sort_column(s_by):
+    """Функция для построения базового запроса заказов из админ-панели"""
+    # По умолчанию сортируем по времени
+    sort_by = request.args.get('sort_by', s_by)
+    if sort_by == 'time':
+        order = request.args.get('order', 'desc')
+    else:
+        order = request.args.get('order', 'asc')
+
+    sort_columns = {
+        'name': User.surname,
+        'price': Order.total_amount,
+        'time': Order.updated_at,
+        'status': Order.status
+    }
+    sort_column = sort_columns.get(sort_by)
+
+    sort_column = sort_column.desc().nulls_last() if order == 'desc' \
+        else sort_column.asc().nulls_first()
+    return sort_column, sort_by, order

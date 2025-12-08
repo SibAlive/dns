@@ -28,14 +28,24 @@
     </div>
 
     <div class="products-grid">
-      {% for product in products %}
+      {% for product in pagination.items %}
         <div class="products-card">
             <a href="{{ url_for(
                     'catalog.product',
                     product_slug=product.slug) }}" class="no-underline">
               <div class="products-header">
                   {% set main_img = product.images | selectattr('is_main') | first %}
-                  <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}" alt="{{ product.name }}" class="products-main-img">
+                      {% if main_img %}
+                        <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
+                             alt="{{ product.name }}"
+                             class="gallery-main-img"
+                             id="mainProductImg">
+                      {% else %}
+                        <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
+                             alt="Изображение отсутствует"
+                             class="gallery-main-img"
+                             id="mainProductImg">
+                      {% endif %}
               </div>
               <div class="products-title">
                 {{ product.name }}
@@ -52,8 +62,6 @@
                     <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
                     <button type="submit" class="products-cart"></button>
                   </form>
-
-
               </div>
           <div class="products-stores">
               {% if product.stock_quantity %}
@@ -65,99 +73,135 @@
         </div>
       {% endfor %}
     </div>
+
+<!--Навигация-->
+    <nav class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('catalog.products', subcategory_slug=subcategory_slug,
+            page=pagination.prev_num) }}"
+               class="page-link">← Предыдущая</a>
+        {% endif %}
+
+        {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != pagination.page %}
+                    <a href="{{ url_for('catalog.products', subcategory_slug=subcategory_slug,
+                    page=page_num) }}"
+                       class="page-link">{{ page_num }}</a>
+                {% else %}
+                    <span class="page-active">{{ page_num }}</span>
+                {% endif %}
+            {% else %}
+                <span class="page-dots">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <a href="{{ url_for('catalog.products', subcategory_slug=subcategory_slug,
+            page=pagination.next_num) }}"
+               class="page-link">Следующая →</a>
+        {% endif %}
+
+        <div class="pagination-info">
+            Показаны {{ pagination.first }}-{{ pagination.last }} из {{ pagination.total }} товаров
+        </div>
+    </nav>
+
 </div>
 
 <script>
-    // --- Переменные для сортировки ---
-    window.sortUrl = "{{ url_for('catalog.product_sort', subcategory_slug=subcategory_slug) }}";
-    window.initialFavoriteIds = {{ favorite_ids | tojson }};
-    window.imagePathTemplate = "{{ url_for('catalog.static', filename='images/').rstrip('/') }}/";
-    window.sortState = {
-        price: 'asc', // 'asc' или 'desc'
-        name: 'asc'
-    };
-    window.csrfToken = "{{ csrf_token() }}"; // добавляем CSRF-токен
-</script>
-
-<script>
     document.addEventListener('DOMContentLoaded', function() {
+        // --- Конфигурация из шаблона ---
+        const sortUrl = "{{ url_for('catalog.product_sort', subcategory_slug=subcategory_slug) }}";
+        const initialFavoriteIds = {{ favorite_ids | tojson }};
+        const imagePathTemplate = "{{ url_for('catalog.static', filename='images/').rstrip('/') }}/";
+        const csrfToken = "{{ csrf_token() }}";
+        const currentPage = {{ pagination.page }};
+        const perPage = 8; // или {{ pagination.per_page }} если динамически
 
         // Обработчик сортировки
         document.querySelectorAll('.sort-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const sortBy = this.dataset.sortBy;
 
-                if (window.sortState[sortBy] === 'asc') {
-                    window.sortState[sortBy] = 'desc';
-                } else {
-                    window.sortState[sortBy] = 'asc';
-                }
+                // Переключаем направление
+                const currentOrder = window.sortState?.[sortBy] === 'asc' ? 'desc' : 'asc';
+                window.sortState = window.sortState || {};
+                window.sortState[sortBy] = currentOrder;
 
+                // Обновляем внешний вид кнопок
                 document.querySelectorAll('.sort-btn').forEach(btn => {
                     btn.classList.remove('sort-asc', 'sort-desc');
                 });
-                this.classList.add(`sort-${window.sortState[sortBy]}`);
+                this.classList.add(`sort-${currentOrder}`);
 
-                const sortUrlWithParams = `${window.sortUrl}?sort_by=${sortBy}&order=${window.sortState[sortBy]}`;
+                // Формируем URL с параметрами
+                const urlParams = new URLSearchParams({
+                    sort_by: sortBy,
+                    order: currentOrder,
+                    page: currentPage,
+                    per_page: perPage
+                });
 
-                console.log("Запрашиваем URL:", sortUrlWithParams);
+                const fullUrl = `${sortUrl}?${urlParams.toString()}`;
 
-                fetch(sortUrlWithParams, {
+                console.log("Запрашиваем сортировку:", fullUrl);
+
+                // Выполняем запрос
+                fetch(fullUrl, {
                     method: 'GET',
                     headers: {
-                        'X-CSRFToken': window.csrfToken
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
                     }
                 })
-                    .then(response => {
-                        console.log("Ответ на сортировку получен:", response);
-                        if (!response.ok) {
-                            console.error('HTTP Error при сортировке:', response.status, response.statusText);
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Данные сортировки получены:", data);
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Получены отсортированные товары:", data);
 
-                        // НАХОДИМ КОНТЕЙНЕР С ТОВАРАМИ
-                        const grid = document.querySelector('.products-grid');
-                        if (!grid) {
-                            console.error('Элемент .products-grid не найден');
-                            return;
-                        }
+                    const grid = document.querySelector('.products-grid');
+                    if (!grid) {
+                        console.error('Контейнер .products-grid не найден');
+                        return;
+                    }
 
-                        // ОЧИЩАЕМ КОНТЕЙНЕР
-                        grid.innerHTML = '';
+                    // Очищаем и вставляем новые товары
+                    grid.innerHTML = '';
 
-                        // ДОБАВЛЯЕМ НОВЫЕ ТОВАРЫ
-                        data.products.forEach(product => {
-                            const productUrl = `/catalog/product/${product.slug}`;
-                            const imageUrl = product.image_url;
-                            const isFavClass = window.initialFavoriteIds.includes(product.id) ? "is-fav" : "";
+                    data.products.forEach(product => {
+                        const productUrl = `/catalog/product/${product.slug}`;
+                        const isFavClass = initialFavoriteIds.includes(product.id) ? "is-fav" : "";
 
-                            const card = `
-                                <div class="products-card">
-                                    <a href="${productUrl}" class="no-underline">
-                                        <div class="products-header">
-                                            <img src="${imageUrl}" alt="${product.name}" class="products-main-img">
-                                        </div>
-                                        <div class="products-title">${product.name}</div>
-                                    </a>
-                                    <div class="products-purchase-row">
-                                        <span class="products-price">${product.price.toLocaleString('ru-RU').replace(/\s/g, ' ')} ₽</span>
-                                        <button class="fav-btn favorite-toggle-btn ${isFavClass}" data-product-id="${product.id}">&#10084;</button>
-                                        <button class="products-cart"></button>
+                        const card = `
+                            <div class="products-card">
+                                <a href="${productUrl}" class="no-underline">
+                                    <div class="products-header">
+                                        <img src="${product.image_url}" alt="${product.name}" class="products-main-img">
                                     </div>
-                                    <div class="products-stores">${product.stock_quantity > 0 ? 'В наличии' : 'Нет в наличии'}</div>
+                                    <div class="products-title">${product.name}</div>
+                                </a>
+                                <div class="products-purchase-row">
+                                    <span class="products-price">${product.price.toLocaleString('ru-RU').replace(/\s/g, ' ')} ₽</span>
+                                    <button class="fav-btn favorite-toggle-btn ${isFavClass}" data-product-id="${product.id}">&#10084;</button>
+                                    <button class="products-cart"></button>
                                 </div>
-                            `;
-                            grid.insertAdjacentHTML('beforeend', card);
-                        });
+                                <div class="products-stores">${product.stock_quantity > 0 ? 'В наличии' : 'Нет в наличии'}</div>
+                            </div>
+                        `;
+                        grid.insertAdjacentHTML('beforeend', card);
+                    });
 
-                        // Логируем, что контейнер очищен и заполнен
-                        console.log('Контейнер .products-grid обновлён.');
-                    })
-                    .catch(error => console.error('Ошибка загрузки при сортировке:', error));
+                    console.log('Сетка товаров обновлена.');
+                })
+                .catch(error => {
+                    console.error('Ошибка при сортировке:', error);
+                    alert('Не удалось применить сортировку. Попробуйте позже.');
+                });
             });
         });
     });

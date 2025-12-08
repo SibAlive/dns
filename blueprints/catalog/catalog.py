@@ -34,6 +34,7 @@ def catalog_index():
 
     return render_template(
         "catalog/catalog.html",
+        title="Каталог товаров",
         categories=cats_with_subcats,
         breadcrumbs=breadcrumbs
     )
@@ -51,17 +52,24 @@ def subcategory(category_slug):
     ]
     return render_template(
         'catalog/catalog.html',
+        title=category_name,
         categories=subcategories,
         cat_slug_if_subcats=category_slug,
         breadcrumbs=breadcrumbs,
     )
 
 @catalog.route('/subcategory/<subcategory_slug>')
-def products(subcategory_slug):
+@catalog.route('/subcategory/<subcategory_slug>/<int:page>')
+def products(subcategory_slug, page=1):
     product_service = ProductService(db)
     cart_service = CartService(db)
 
-    list_products = product_service.get_products_by_subcategory_slug(subcat_slug=subcategory_slug)
+    pagination = product_service.get_products_by_subcategory_slug(
+        subcat_slug=subcategory_slug,
+        page=page,
+        per_page=8
+    )
+
     category = product_service.get_category_by_subcategory_slug(subcat_slug=subcategory_slug)
     category_name = category.name
     category_slug = category.slug
@@ -81,11 +89,11 @@ def products(subcategory_slug):
     ]
     return render_template(
         'catalog/products.html',
-        products=list_products,
+        pagination=pagination,
         subcategory_slug=subcategory_slug,
         favorite_ids=favorite_ids,
         breadcrumbs=breadcrumbs,
-        title=category_name
+        title=subcategory_name
     )
 
 @catalog.route('/product/<product_slug>')
@@ -131,7 +139,8 @@ def product_sort(subcategory_slug):
     product_service = ProductService(db)
     sort_by = request.args.get('sort_by', 'name')
     order_direction = request.args.get('order', 'asc')
-    cat_slug = product_service.get_category_by_subcategory_slug(subcat_slug=subcategory_slug).slug
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 8, type=int)
 
     valid_sort = {'price': Product.price, 'name': Product.name}
     order_field = valid_sort.get(sort_by, Product.name)
@@ -142,17 +151,18 @@ def product_sort(subcategory_slug):
     else:
         order_field = asc(order_field)
 
-    list_products = product_service.get_products_by_subcategory_slug(
+    pagination = product_service.get_products_by_subcategory_slug(
         subcat_slug=subcategory_slug,
+        page=page,
+        per_page=per_page,
         order=order_field
     )
 
     result = []
-    for p in list_products:
+    for p in pagination.items:
         # Строим полный URL к изображению
         image_filename = f"images/{product_service.get_main_image(product_id=p.id).image_path}"
         image_url = url_for('catalog.static', filename=image_filename)
-        print(image_url)
         result.append({
             'id': p.id,
             'category_id': p.category_id,
@@ -168,7 +178,14 @@ def product_sort(subcategory_slug):
             'weight': p.weight,
             'image_url': image_url
         })
-    return jsonify({'products': result})
+    return jsonify({
+        'products': result,
+        'has_prev': pagination.has_prev,
+        'has_next': pagination.has_next,
+        'page': pagination.page,
+        'pages': pagination.pages,
+        'total': pagination.total
+    })
 
 
 @catalog.route('/add_to_cart/<int:product_id>', methods=['POST'])
@@ -365,7 +382,7 @@ def order():
 def orders():
     """Отображает страницу со всеми заказами пользователя"""
     cart_service = CartService(db)
-    orders_list = cart_service.get_orders(user_id=current_user.get_id())
+    orders_list = cart_service.get_orders_by_user_id(user_id=current_user.get_id())
     return render_template(
         'catalog/orders.html',
         orders=orders_list
@@ -397,6 +414,6 @@ def repeat_order(order_id):
 
     for product in order_items:
         for _ in range(product.quantity):
-            add_product_to_cart(db, user_id=user_id, product_id=product.id)
+            add_product_to_cart(db, user_id=user_id, product_id=product.product_id)
 
     return redirect(url_for('catalog.cart'))

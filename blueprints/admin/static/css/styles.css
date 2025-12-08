@@ -605,3 +605,299 @@ a.logout-btn:hover {
 .subcategory-content.collapsed{
   display: none;
 }
+
+
+/* Таблицы в админке (orders, users и т.п.) */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  overflow: hidden;
+  table-layout: fixed;              /* чтобы колонки равномерно распределялись */
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+  vertical-align: middle;
+  word-wrap: break-word;            /* перенос длинных строк */
+}
+
+.admin-table thead th {
+  background: #f0f6ff;
+  color: #1E5BB7;
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+/* Ховер-эффект строк */
+.admin-table tbody tr:hover {
+  background: #f7faff;
+}
+
+
+/* --- Стили формы фильтра по дате --- */
+.date-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafd;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.date-filter-form label {
+  font-weight: 600;
+  color: #05306A;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.date-filter-form input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #d3dde6;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: #fff;
+  min-width: 160px;
+}
+
+.date-filter-form button,
+.date-filter-form a {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.date-filter-form button {
+  background: #1E5BB7;
+  color: white;
+  border: none;
+}
+
+.date-filter-form button:hover {
+  background: #184e9b;
+}
+
+.date-filter-form a {
+  background: #f4f7fa;
+  color: #1E5BB7;
+  border: 1px solid #1E5BB7;
+  display: inline-block;
+}
+
+.date-filter-form a:hover {
+  background: #e7eaf1;
+  color: #164d8d;
+  border-color: #164d8d;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .date-filter-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .date-filter-form label {
+    align-self: flex-start;
+  }
+}
+
+
+/* Гарантирует вертикальное расположение формы и таблицы */
+.orders-wrapper {
+  display: block;
+  width: 100%;
+  overflow: hidden; /* очищает float, если есть */
+}
+
+
+
+
+
+/* --- Стили для страницы заказа --- */
+.order-details-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e0e7ff;
+}
+
+.order-header h1 {
+    color: #0073e6;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.order-info-card {
+    margin-bottom: 32px;
+}
+
+.order-info-card h2 {
+    color: #0073e6;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px 24px;
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f3ff;
+}
+
+.info-label {
+    font-weight: 700;
+    color: #1E5BB7;
+    min-width: 140px;
+    flex-shrink: 0;
+}
+
+.info-value {
+    color: #05306A;
+    font-weight: 500;
+    flex: 1;
+}
+
+.info-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e7ff;
+}
+
+.info-address,
+.info-comment {
+    background: #f9fbff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #0073e6;
+    margin-top: 8px;
+    font-size: 0.98rem;
+    line-height: 1.5;
+}
+
+.order-items-section h2 {
+    color: #0073e6;
+    margin-bottom: 18px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.admin-table-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+.total-row {
+    background: #f0f6ff !important;
+    font-size: 1.05rem;
+}
+
+.total-row td {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+}
+
+.no-items {
+    text-align: center;
+    color: #7a7a7a;
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+.order-actions {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e7ff;
+}
+
+.btn-back {
+    display: inline-block;
+    background: #f4f7fa;
+    color: #1E5BB7;
+    font-size: 1.07rem;
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 2px solid #1E5BB7;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: #e7eaf1;
+    color: #164d8d;
+    border-color: #164d8d;
+    transform: translateX(-2px);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .order-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        min-width: auto;
+    }
+}
+
+.order-count-box {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 24px;
+    background: #fff;
+}
+.order-count-box.link {
+    color: #007bff;
+    text-decoration: none;
+}
+.order-count-box.link:hover {
+    background-color: #f8f9fa;
+}

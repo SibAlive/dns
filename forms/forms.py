@@ -41,6 +41,7 @@ class LoginForm(FlaskForm):
     remember = BooleanField("Запомнить", default=False)
     submit = SubmitField("Войти")
 
+
 class EditProfileForm(FlaskForm):
     surname = StringField("Фамилия: ", validators=[DataRequired(), Length(min=3, max=20)])
     name = StringField("Имя: ", validators=[DataRequired(), Length(min=2, max=20)])

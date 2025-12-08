@@ -8,7 +8,10 @@ class UserLogin(UserMixin):
     def fromDB(self, db, user_id):
         user_service = UserService(db)
         self.__user = user_service.get_user_by_id(user_id=user_id)
-        return self
+        if self.__user:
+            return self
+        else:
+            return None
 
     def create(self, user):
         self.__user = user
