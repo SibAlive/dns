@@ -82,12 +82,12 @@
                           {% if main_img %}
                             <img src="{{ url_for('catalog.static', filename='images/' ~ main_img.image_path) }}"
                                  alt="{{ product.name }}"
-                                 class="gallery-main-img"
+                                 class="products-main-img"
                                  id="mainProductImg">
                           {% else %}
                             <img src="{{ url_for('catalog.static', filename='images/placeholder.jpg') }}"
                                  alt="Изображение отсутствует"
-                                 class="gallery-main-img"
+                                 class="products-main-img"
                                  id="mainProductImg">
                           {% endif %}
                   </div>
