@@ -1,0 +1,20 @@
+name: Deploy flask_dns
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: sibalive.sytes.net
+          port: 2222
+          username: sibalive
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/sibalive/flask_dns
+            ./deploy.sh

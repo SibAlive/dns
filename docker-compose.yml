@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:17-alpine
-    container_name: online_shop-postgres
+    container_name: dns-postgres
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -20,15 +20,15 @@ services:
 
   web:
     build: .
-    container_name: online_shop-web
+    container_name: dns-web
     env_file:
       .env
     depends_on:
       - db
-      - redis
+#      - redis
     ports:
       - "5002:5000"
-    command: ["waitress-serve", "--host=0.0.0.0", "--port=5000", "web.wsgi:application"]
+    command: ["waitress-serve", "--host=0.0.0.0", "--port=5000", "wsgi:application"]
     restart: unless-stopped
 
 volumes:
