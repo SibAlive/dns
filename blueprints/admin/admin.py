@@ -68,6 +68,7 @@ def require_login():
 def index():
     return render_template('admin/dashboard.html')
 
+
 @admin.route('/dashboard')
 def dashboard():
     admin_service = AdminService(db)
