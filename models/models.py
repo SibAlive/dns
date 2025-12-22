@@ -164,11 +164,3 @@ class OrderItem(db.Model):
 
     order = relationship("Order", back_populates="order_item")
     products = relationship("Product", back_populates="order_item")
-
-
-class Example(db.Model):
-    """Список товаров в заказе"""
-    __tablename__ = "examples"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, nullable=False)  # Наименование товара на момент заказа
