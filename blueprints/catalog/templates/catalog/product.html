@@ -65,7 +65,7 @@
       </div>
 
       <div class="product-price-row">
-        <span class="price-current">{{ product.price | money }} Проверка!!!₽</span>
+        <span class="price-current">{{ product.price | money }} Проверка!!!123₽</span>
         {% if product.latest_price and product.latest_price.price > product.price %}
           <span class="price-old">{{ product.latest_price.price | money}} ₽</span>
         {% endif %}
