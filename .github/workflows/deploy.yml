@@ -18,4 +18,3 @@ jobs:
           script: |
             cd /home/sibalive/flask_dns
             ./deploy.sh
-            docker compose exec -T dns-web alembic upgrade head
