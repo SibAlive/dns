@@ -36,3 +36,7 @@ pip-delete-this-directory.txt
 
 # aiogram / asyncio
 *.session
+
+# Docker
+docker-compose.yml
+Dockerfile
