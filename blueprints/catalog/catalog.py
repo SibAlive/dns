@@ -101,6 +101,7 @@ def product(product_slug):
     product_service = ProductService(db)
     cart_service = CartService(db)
 
+    # Получаем карточку продукта и его предыдущую стоимость
     product_card = product_service.get_product_by_slug(product_slug=product_slug)
 
     if current_user.is_authenticated:

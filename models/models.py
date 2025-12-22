@@ -68,9 +68,17 @@ class Product(db.Model):
                           back_populates="product",
                           order_by="ProductImage.sort_order",
                           cascade="all, delete-orphan")
+    old_price = relationship("ProductPrice", back_populates="product", cascade="all, delete-orphan")
 
     category = relationship("Category", back_populates="products")
     subcategory = relationship("SubCategory", back_populates="products")
+
+    @property
+    def latest_price(self):
+        """Последня цена или none"""
+        if self.old_price:
+            return max(self.old_price, key=lambda p: p.created_at)
+        return None
 
 
 class ProductImage(db.Model):
@@ -83,6 +91,16 @@ class ProductImage(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
 
     product = relationship("Product", back_populates="images")
+
+
+class ProductPrice(db.Model):
+    __tablename__ = "product_prices"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True)
+    price = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+
+    product = relationship("Product", back_populates="old_price")
 
 
 class CartItem(db.Model):

@@ -65,8 +65,10 @@
       </div>
 
       <div class="product-price-row">
-        <span class="price-current">{{ '{:,.0f}'.format(product.price).replace(',', ' ') }} ₽</span>
-        <span class="price-old">137 499</span>
+        <span class="price-current">{{ product.price | money }} ₽</span>
+        {% if product.latest_price and product.latest_price.price > product.price %}
+          <span class="price-old">{{ product.latest_price.price | money}} ₽</span>
+        {% endif %}
       </div>
 
       <div class="product-buy-row">

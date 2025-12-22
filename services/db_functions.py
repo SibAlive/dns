@@ -2,13 +2,14 @@ from flask import flash
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
+from sqlalchemy.orm import contains_eager
 from werkzeug.security import generate_password_hash
 from slugify import slugify
 import logging
 from datetime import datetime, timedelta
 
 from models import (User, Category, SubCategory, Product, CartItem, Favorite,
-                    Order, OrderItem, ProductImage)
+                    Order, OrderItem, ProductImage, ProductPrice)
 
 
 logger = logging.getLogger(__name__)
@@ -295,6 +296,7 @@ class ProductService:
         ).scalar()
         return product
 
+
     def get_products_by_subcategory_slug(self, *,
                                          subcat_slug,
                                          order=None,
@@ -350,7 +352,16 @@ class ProductService:
         return product
 
     def edit_product(self, *, form, product):
-        """Функция редактирует существующий товар"""
+        """Функция редактирует существующий товар
+        и добавляет старую цену (если цена менялась) в таблицу ProductPrice"""
+        # Проверяем изменилась ли цена
+        if product.price != form.price.data:
+            old_price = ProductPrice(
+                product_id=product.id,
+                price=product.price
+            )
+            self.db.session.add(old_price)
+
         product.name = form.name.data
         product.slug = slugify(form.name.data),
         product.description = form.description.data

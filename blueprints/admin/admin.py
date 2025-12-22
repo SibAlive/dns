@@ -274,15 +274,19 @@ def delete_category(slug):
     object = Category if not is_subcategory else SubCategory
 
     # Удаляем фото
-    cat_slug = product_service.get_category_by_subcategory_slug(subcat_slug=slug).slug
-    file_name = product_service.get_subcategory_by_slug(subcat_slug=slug).picture
-    file_path = create_path_for_file(current_app,
-                                     subfolders='categories',
-                                     file_name=file_name
-                                     ) \
-        if not is_subcategory else create_path_for_file(current_app,
-                                                        subfolders=['subcategories', cat_slug],
-                                                        file_name=file_name)
+    if not is_subcategory:
+        file_name = product_service.get_category_by_slug(cat_slug=slug).picture
+        file_path = create_path_for_file(current_app,
+                                         subfolders='categories',
+                                         file_name=file_name
+                                         )
+    else:
+        cat_slug = product_service.get_category_by_subcategory_slug(subcat_slug=slug).slug
+        file_name = product_service.get_subcategory_by_slug(subcat_slug=slug).picture
+        file_path = create_path_for_file(current_app,
+                                        subfolders=['subcategories', cat_slug],
+                                        file_name=file_name
+                                        )
     try:
         os.remove(file_path)
     except FileNotFoundError:
