@@ -42,5 +42,7 @@ docker-compose.yml
 Dockerfile
 
 # images
-/blueprints/catalog/static/images/
-/blueprints/header/static/images/
+/blueprints/catalog/static/images/*
+!/blueprints/catalog/static/images/.gitkeep
+/blueprints/header/static/images/*
+!/blueprints/header/static/images/.gitkeep
