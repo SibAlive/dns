@@ -2,7 +2,6 @@ from flask import flash
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
-from sqlalchemy.orm import contains_eager
 from werkzeug.security import generate_password_hash
 from slugify import slugify
 import logging
