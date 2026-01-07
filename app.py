@@ -16,6 +16,7 @@ from sheduler import setup_scheduler
 logger = logging.getLogger(__name__)
 
 
+# Проверка
 def create_app():
     # Задаем базовую конфигурацию логирования
     logging.basicConfig(
