@@ -6,7 +6,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 
 from extensions import db
-from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len, UserService
+from services import DATABASE_URL_FOR_FLASK, create_inject_cart_len
 from blueprints import header, catalog, admin
 from services.UserLogin import UserLogin
 from sheduler import setup_scheduler
@@ -16,7 +16,7 @@ from sheduler import setup_scheduler
 logger = logging.getLogger(__name__)
 
 
-# Проврека
+# Проверка
 def create_app():
     # Задаем базовую конфигурацию логирования
     logging.basicConfig(
