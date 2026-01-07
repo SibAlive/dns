@@ -40,3 +40,7 @@ pip-delete-this-directory.txt
 # Docker
 docker-compose.yml
 Dockerfile
+
+# images
+/blueprints/catalog/static/images/
+/blueprints/header/static/images/
