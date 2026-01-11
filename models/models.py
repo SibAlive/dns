@@ -1,3 +1,4 @@
+from flask import url_for
 from sqlalchemy.orm import relationship
 
 from extensions import db
@@ -25,11 +26,14 @@ class Category(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
-    slug = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False, unique=True, index=True)
     picture = db.Column(db.Text, nullable=False)
 
     subcategory = relationship("SubCategory", back_populates="category", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="category", cascade="all, delete-orphan")
+
+    def get_absolute_url(self):
+        return url_for('catalog.subcategory', category_slug=self.slug)
 
 
 class SubCategory(db.Model):
@@ -38,11 +42,14 @@ class SubCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True)
     name = db.Column(db.Text, nullable=False)
-    slug = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False, unique=True, index=True)
     picture = db.Column(db.Text, nullable=False)
 
     category = relationship("Category", back_populates="subcategory")
     products = relationship("Product", back_populates="subcategory", cascade="all, delete-orphan")
+
+    def get_absolute_url(self):
+        return url_for('catalog.products', subcategory_slug=self.slug)
 
 
 class Product(db.Model):
@@ -52,7 +59,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id", ondelete="CASCADE"), nullable=False, index=True)
     subcategory_id = db.Column(db.Integer, db.ForeignKey("sub_categories.id", ondelete="CASCADE"), nullable=False, index=True)
     name = db.Column(db.Text, nullable=False)
-    slug = db.Column(db.Text, nullable=False)
+    slug = db.Column(db.Text, nullable=False, unique=True, index=True)
     description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
     stock_quantity = db.Column(db.Integer, default=0) # Остатки на складе
@@ -79,6 +86,9 @@ class Product(db.Model):
         if self.old_price:
             return max(self.old_price, key=lambda p: p.created_at)
         return None
+
+    def get_absolute_url(self):
+        return url_for('catalog.product', product_slug=self.slug)
 
 
 class ProductImage(db.Model):

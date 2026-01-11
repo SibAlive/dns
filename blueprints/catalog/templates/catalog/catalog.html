@@ -32,15 +32,10 @@
 
               <div class="category-title">{{ category.cat.name }}</div>
                 <ul class="subcategory-list">
-                  <li class="category-item"><a href="{{
-                          url_for('catalog.subcategory',
-                          category_slug=category.cat.slug) }}"
+                  <li class="category-item"><a href="{{ category.cat.get_absolute_url() }}"
                                                class="subcategory-link">{{ category.cat.name }}</a></li>
                   {% for subcat in category.subcat %}
-                    <li class="subcategory-item"><a href="{{
-                            url_for('catalog.products',
-                            category_slug=category.cat.slug,
-                            subcategory_slug=subcat.slug) }}"
+                    <li class="subcategory-item"><a href="{{ subcat.get_absolute_url() }}"
                                                 class="subcategory-link">{{ subcat.name }}</a></li>
                   {% endfor %}
                 </ul>
@@ -56,9 +51,6 @@
             {% endif %}
           </div>
         {% endfor %}
-
-
-      <!-- Добавьте остальные категории аналогично -->
     </div>
 </div>
 

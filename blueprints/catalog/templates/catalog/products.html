@@ -30,9 +30,7 @@
     <div class="products-grid">
       {% for product in pagination.items %}
         <div class="products-card">
-            <a href="{{ url_for(
-                    'catalog.product',
-                    product_slug=product.slug) }}" class="no-underline">
+            <a href="{{ product.get_absolute_url() }}" class="no-underline">
               <div class="products-header">
                   {% set main_img = product.images | selectattr('is_main') | first %}
                       {% if main_img %}
