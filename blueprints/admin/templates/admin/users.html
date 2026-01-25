@@ -20,6 +20,7 @@
           <th>Телефон</th>
           <th>Дата регистрации</th>
           <th>Количество заказов</th>
+          <th>Статус</th>
           <th>Действия</th>
         </tr>
       </thead>
@@ -42,14 +43,22 @@
                       <span class="order-count-box">0</span>
                       {% endif %}
                   </td>
+                  <td>{{ 'Активен' if user.is_active else 'Удален'}}</td>
                   <td>
-                    <a href="{{ url_for('admin.user_edit', user_id=user.id) }}"
-                       class="user-action-btn">Изменить
-                    </a>
-                    <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}" style="display:inline">
-                      <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
-                      <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить категорию?')">Удалить профиль</button>
-                    </form>
+                    {% if user.is_active %}
+                        <a href="{{ url_for('admin.user_edit', user_id=user.id) }}"
+                           class="user-action-btn">Изменить
+                        </a>
+
+                        <form method="POST" action="{{ url_for('admin.user_delete', user_id=user.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ g.csrf_token }}">
+                            <button type="submit" class="entity-action-btn delete" onclick="return confirm('Удалить профиль?')">Удалить профиль</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('admin.user_restore', user_id=user.id) }}"
+                           class="user-action-btn">Восстановить профиль
+                        </a>
+                    {% endif %}
                   </td>
                 </tr>
             {% endfor %}

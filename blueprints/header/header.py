@@ -118,6 +118,18 @@ def profile():
         user=current_user,
     )
 
+@header.route('/delete_profile')
+@login_required
+def delete_profile():
+    user_service = UserService(db)
+    user_id = current_user.get_id()
+
+    logout_user()
+    user_service.delete_profile(user_id=user_id)
+
+    return redirect(url_for('header.login'))
+
+
 @header.route('/userava')
 @login_required
 def userava():

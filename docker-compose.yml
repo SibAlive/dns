@@ -18,7 +18,6 @@ services:
       .env
     depends_on:
       - db
-#      - redis
     ports:
       - "5002:5000"
     command: ["waitress-serve", "--host=0.0.0.0", "--port=5000", "wsgi:application"]

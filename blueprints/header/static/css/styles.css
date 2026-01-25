@@ -499,6 +499,16 @@ header {
     text-decoration: underline;
 }
 
+    /* Стили для ссылки "Удалить профиль" */
+.profile-delete-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: #ff0000;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
+
 
     /* Стили для страницы "search.html" */
 .search-container {

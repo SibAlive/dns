@@ -123,11 +123,19 @@ def user_edit(user_id):
         user=user
     )
 
+@admin.route('/user/restore/<int:user_id>', methods=['GET', 'POST'])
+def user_restore(user_id):
+    admin_service = AdminService(db)
+
+    admin_service.change_user_status(user_id=user_id, status=True)
+    return redirect(url_for('admin.users'))
+
+
 @admin.route('/user/delete_user/<int:user_id>', methods=['GET', 'POST'])
 def user_delete(user_id):
     admin_service = AdminService(db)
 
-    admin_service.delete_profile(user_id=user_id)
+    admin_service.change_user_status(user_id=user_id, status=False)
     return redirect(url_for('admin.users'))
 
 

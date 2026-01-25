@@ -68,17 +68,17 @@ class UserService:
         return False
 
     def get_user(self, *, form):
-        """Функция для входа - возвращает пользователя по email или номеру телефона"""
+        """Функция для входа - возвращает пользователя по email или номеру телефона если профиль не удален"""
         login_type = form.login_type.data
         if login_type == 'email':
             email = form.email.data
             user = self.db.session.execute(
-                select(User).where(User.email == email)
+                select(User).where(User.email == email, User.is_active==True)
             ).scalars().first()
         elif login_type == 'phone':
             phone = form.phone.data
             user = self.db.session.execute(
-                select(User).where(User.phone == phone)
+                select(User).where(User.phone == phone, User.is_active==True)
             ).scalars().first()
 
         if user:
@@ -155,6 +155,14 @@ class UserService:
         flash("Данные сохранены", category="success")
         return True
 
+    def delete_profile(self, *, user_id):
+        user = self.db.session.execute(
+            select(User).where(User.id == user_id)
+        ).scalars().first()
+        user.is_active = False
+        self.db.session.commit()
+        logger.info(f"Профиль пользователя: {user_id} удален")
+        flash("Ваш профиль успешно удален", category="success")
 
 class ProductService:
     def __init__(self, db):
@@ -674,17 +682,17 @@ class AdminService:
             return order
         return None
 
-    def delete_profile(self, *, user_id):
-        """Удаляет профиль пользователя"""
+    def change_user_status(self, *, user_id: int, status: bool):
+        """Меняет статус профиля пользователя"""
         profile = self.db.session.execute(
             select(User).where(User.id == user_id)
         ).scalar_one_or_none()
 
         if profile:
-            self.db.session.delete(profile)
-            flash("Профиль пользователя успешно удален!", category="success")
-            logger.warning(f"Пользователь {user_id} удален из БД")
-        self.db.session.commit()
+            profile.is_active = status
+            flash("Статус пользователя успешно изменен!", category="success")
+            logger.warning(f"Статус пользователя {user_id} изменен")
+            self.db.session.commit()
 
     def get_users_with_orders_count(self):
         """Функция возвращает всех пользователей и количество заказов"""

@@ -15,6 +15,7 @@ class User(db.Model):
     psw = db.Column(db.Text, nullable=False)
     avatar = db.Column(db.LargeBinary, default=None)
     time = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     cart_item = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
     favorite = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")

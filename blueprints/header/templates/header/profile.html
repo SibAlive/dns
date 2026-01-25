@@ -38,7 +38,11 @@
                     <input type="hidden" name="edit_mode" value="True">
                     <button type="submit">Редактировать</button>
                 </form>
-                <a href="{{ url_for('header.logout') }}" class="profile-logout-link">Выйти из профиля</a>
+            <a href="{{ url_for('header.delete_profile') }}"
+                class="profile-delete-link"
+                onclick="return confirm('Вы уверенеы, что хотите удалить профиль?')">Удалить профиль</a>
+            <p><a href="{{ url_for('header.logout') }}" class="profile-logout-link"> Выйти из профиля
+            </a>
 
             {% else %}
                 <!-- Режим редактирования -->
