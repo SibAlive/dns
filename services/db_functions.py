@@ -579,6 +579,14 @@ class CartService:
             self.db.session.rollback()
             logger.error("Ошибка оформления заказа " + str(e))
 
+    def get_order_by_id(self, *, order_id):
+        """Возвращает заказ по его id"""
+        order = self.db.session.execute(
+            select(Order)
+            .where(Order.id == order_id)
+        ).scalars().first()
+        return order
+
     def get_orders_by_user_id(self, *, user_id):
         """Возвращает список заказов пользователя"""
         orders = self.db.session.execute(

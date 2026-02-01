@@ -18,7 +18,9 @@
 # pip install -r requirements.txt
 4. Настройка переменных окружения (файл .env необходимо заполнить своими данными:
 # cp .env.example .env
+5. Отметить папку dns как source root и создать БД и таблицы
+# Запустить файл services/create_table/create_db_table
 5. Восстановления дампа БД
-# pg_restore -h localhost -p 5432 -U postgres -d test_dns --clean --if-exists backup_test.dump
-6. Отметить папку dns как source root, запустить сервер локально:
+# pg_restore -h localhost -p 5432 -U postgres -d test_dns --clean --if-exists backup.dump
+6. Запустить сервер локально:
 # waitress-serve --host=localhost --port=5000 "wsgi:application"

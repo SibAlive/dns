@@ -168,8 +168,16 @@ def upload():
 def search():
     product_service = ProductService(db)
     query = request.args.get('q', '').strip()
+
     if not query:
+        flash("Поисковый запрос пустой", "warning")
         return render_template('header/search.html', products=[])
+    if len(query) > 100:
+        flash("Поисковый запрос слишком длинный", "error")
+        return render_template('header/search.html', products=[])
+    if '%' in query or '_' in query:
+        query = query.replace('%', '').replace('_', '')
+
     products = product_service.product_search(string=query)
     return render_template(
         'header/search.html',

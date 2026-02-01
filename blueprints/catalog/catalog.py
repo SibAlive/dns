@@ -394,6 +394,17 @@ def orders():
 def buy_order(order_id):
     """Оплата заказа"""
     cart_service = CartService(db)
+    # Проверяем, принадлежит ли заказ текущему пользователю
+    order = cart_service.get_order_by_id(order_id=order_id)
+    if not order or order.user_id != current_user.get_id():
+        flash("У Вас нет прав для выполнения этой операции", "error")
+        return redirect(url_for('catalog.orders'))
+
+    # Проверка статуса заказа:
+    if order.status != 'Забронирован':
+        flash("Невозможно оплатить заказ с текущим статусом", "error")
+        return redirect(url_for('catalog.orders'))
+
     cart_service.buy_order(order_id=order_id)
     return redirect(request.referrer)
 
@@ -402,8 +413,18 @@ def buy_order(order_id):
 def cancel_order(order_id):
     """Отмена заказа"""
     cart_service = CartService(db)
-    cart_service.cancel_order(order_id=order_id)
+    # Проверяем, принадлежит ли заказ текущему пользователю
+    order = cart_service.get_order_by_id(order_id=order_id)
+    if not order or order.user_id != current_user.get_id():
+        flash("У Вас нет прав для выполнения этой операции", "error")
+        return redirect(url_for('catalog.orders'))
 
+    # Проверка статуса заказа:
+    if order.status != 'Забронирован':
+        flash("Невозможно отменить заказ с текущим статусом", "error")
+        return redirect(url_for('catalog.orders'))
+
+    cart_service.cancel_order(order_id=order_id)
     return redirect(request.referrer)
 
 @catalog.route('/order/repeat_order/<int:order_id>', methods=['GET', 'POST'])
@@ -411,8 +432,14 @@ def cancel_order(order_id):
 def repeat_order(order_id):
     user_id = current_user.get_id()
     cart_service = CartService(db)
-    order_items = cart_service.get_products_by_order_id(order_id=order_id)
 
+    # Проверяем, принадлежит ли заказ текущему пользователю
+    order = cart_service.get_order_by_id(order_id=order_id)
+    if not order or order.user_id != user_id:
+        flash("У Вас нет прав для выполнения этой операции", "error")
+        return redirect(url_for('catalog.orders'))
+
+    order_items = cart_service.get_products_by_order_id(order_id=order_id)
     for product in order_items:
         for _ in range(product.quantity):
             add_product_to_cart(db, user_id=user_id, product_id=product.product_id)
