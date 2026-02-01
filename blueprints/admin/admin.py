@@ -1,6 +1,7 @@
 import os
 import logging
 import shutil
+from environs import Env
 
 from flask import (Blueprint, request, redirect, url_for, flash,
                    render_template, session, current_app)
@@ -12,6 +13,10 @@ from services import (ProductService, create_path_for_file, build_admin_orders_s
                       CartService, UserService, AdminService)
 from forms import (CategoryForm, CategoryEditForm, ProductForm, ProductEditForm,
                    EditProfileForm)
+
+
+env = Env()
+env.read_env()
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +46,7 @@ def login():
         return redirect(url_for('admin.index'))
 
     if request.method == 'POST':
-        if request.form['user'] == 'admin' and request.form['psw'] == '12345':
+        if request.form['user'] == env('ADMIN_LOGIN') and request.form['psw'] == env('ADMIN_PSW'):
             login_admin()
             return redirect(url_for('admin.dashboard'))
         else:

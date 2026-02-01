@@ -1,5 +1,6 @@
 import os
 import logging
+from environs import Env
 from flask import Flask, g
 from flask_login import LoginManager
 from flask_wtf import CSRFProtect
@@ -11,6 +12,9 @@ from blueprints import header, catalog, admin
 from services.UserLogin import UserLogin
 from sheduler import setup_scheduler
 
+
+env = Env()
+env.read_env()
 
 # Инициализируем логгер
 logger = logging.getLogger(__name__)
@@ -28,7 +32,7 @@ def create_app():
     upload_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'images')
 
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'sibalive_secret_key'
+    app.config['SECRET_KEY'] = env('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL_FOR_FLASK
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['CATALOG_UPLOAD_FOLDER'] = os.path.join(upload_folder, 'catalog')
