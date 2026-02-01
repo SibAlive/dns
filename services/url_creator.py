@@ -39,9 +39,6 @@ DATABASE_URL_FOR_FLASK = (
     f"{db_new.host}:{db_new.port}/{db_new.database}"
 )
 
-ADMIN_USERNAME = env("ADMIN_USERNAME", 'admin')
-ADMIN_PASSWORD = env("ADMIN_PASSWORD", 'password')
-
 
 # Создаем асинхронный движок SQLAlchemy
 engine = create_engine(DATABASE_URL_FOR_FLASK)
